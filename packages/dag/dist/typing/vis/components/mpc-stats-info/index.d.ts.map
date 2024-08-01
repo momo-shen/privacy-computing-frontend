@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../../src/vis/components/mpc-stats-info/index.tsx"],"names":[],"mappings":"AAEA,OAAO,KAA2B,MAAM,OAAO,CAAC;AAEhD,OAAO,KAAK,EAAE,gBAAgB,EAAE,MAAM,WAAW,CAAC;AAMlD,OAAO,cAAc,CAAC;AAGtB,eAAO,MAAM,YAAY,EAAE,KAAK,CAAC,iBAAiB,CAAC,iBAAiB,CAkEnE,CAAC;AACF,MAAM,WAAW,iBAAiB;IAChC,IAAI,EAAE,gBAAgB,CAAC;CACxB"}

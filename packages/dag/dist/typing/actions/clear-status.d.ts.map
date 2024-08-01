@@ -1,0 +1,1 @@
+{"version":3,"file":"clear-status.d.ts","sourceRoot":"","sources":["../../../src/actions/clear-status.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,MAAM,UAAU,CAAC;AAItC,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,YAAY,CAAC;AACjD,OAAO,EAAE,UAAU,EAAE,MAAM,YAAY,CAAC;AAExC,qBAAa,iBAAkB,YAAW,cAAc;IACtD,IAAI,aAA0B;IAC9B,KAAK,SAAY;IAEjB,MAAM,CAAC,KAAK,EAAE,KAAK;CAcpB"}

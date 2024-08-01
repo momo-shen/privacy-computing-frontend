@@ -1,0 +1,1 @@
+{"version":3,"file":"emitter.d.ts","sourceRoot":"","sources":["../../src/emitter.ts"],"names":[],"mappings":"AAAA,KAAK,WAAW,CAAC,CAAC,IAAI,CAAC,IAAI,EAAE,CAAC,KAAK,IAAI,CAAC;AAExC,qBAAa,OAAO,CAAC,CAAC;IACpB,aAAa,EAAE,WAAW,CAAC,CAAC,CAAC,EAAE,CAAM;IAErC,EAAE,YAAa,YAAY,CAAC,CAAC,UAE3B;IAEF,IAAI,SAAU,CAAC,UAIb;IAEF,OAAO;CAGR"}

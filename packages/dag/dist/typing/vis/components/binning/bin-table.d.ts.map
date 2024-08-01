@@ -1,0 +1,1 @@
+{"version":3,"file":"bin-table.d.ts","sourceRoot":"","sources":["../../../../../src/vis/components/binning/bin-table.tsx"],"names":[],"mappings":"AACA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,OAAO,KAAK,EAAE,OAAO,EAAE,MAAM,aAAa,CAAC;AAoB3C,eAAO,MAAM,cAAc,EAAE,KAAK,CAAC,EAAE,CAAC,KAAK,CAU1C,CAAC;AAEF,MAAM,WAAW,KAAK;IACpB,IAAI,EAAE,OAAO,EAAE,CAAC;CACjB"}

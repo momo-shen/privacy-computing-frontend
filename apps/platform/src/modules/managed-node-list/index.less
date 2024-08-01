@@ -1,0 +1,36 @@
+.nodeList {
+  overflow: auto;
+  height: calc(100vh - 90px);
+  padding: 16px 24px 0;
+
+  .nodeListHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .content {
+    padding: 16px 0 0;
+
+    .idText {
+      color: rgb(0 0 0 / 45%);
+      font-size: 12px;
+    }
+
+    :global(.ant-table-thead) {
+      height: 54px;
+    }
+
+    :global(.ant-table-row) {
+      height: 62px;
+    }
+  }
+}
+
+.embeddedTag {
+  border: 1px solid #cdfadf;
+  border-radius: 4px;
+  background-color: #ecfff4;
+  color: rgb(0 0 0 / 88%);
+  font-weight: 400;
+}

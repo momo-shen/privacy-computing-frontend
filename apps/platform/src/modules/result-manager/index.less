@@ -1,0 +1,33 @@
+.main {
+  display: flex;
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 16px 24px 0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.toolbar {
+  display: flex;
+}
+
+.content {
+  padding: 16px 0 0;
+
+  :global(.ant-table-thead) {
+    height: 54px;
+  }
+
+  :global(.ant-table-row) {
+    height: 54px;
+  }
+
+  .action {
+    .delete {
+      margin-right: 10px;
+    }
+  }
+}
