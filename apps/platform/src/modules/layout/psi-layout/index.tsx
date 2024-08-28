@@ -18,11 +18,8 @@ const apiEndpoints = {
 };
 
 const mockedPartners = [
-  {id: 1, name: '节点1', ip: '1.1.1.2', port: '8081'},
-  {id: 2, name: '节点2', ip: '1.1.1.3', port: '8082'},
-  {id: 3, name: '节点3', ip: '1.1.1.4', port: '8083'},
-  {id: 4, name: '节点4', ip: '1.1.1.5', port: '8084'},
-  {id: 5, name: '节点5', ip: '1.1.1.6', port: '8085'}
+  {id: 1, name: '节点1', ip: '127.0.0.1', port: '8012'},
+  {id: 2, name: '节点2', ip: '127.0.0.1', port: '8011'}
 ];
 
 const mockedFiles = [
@@ -36,11 +33,11 @@ const mockedPartnerFiles = [
 ];
 
 const mockedLocalFileColumns = [
-  '列1', '列2'
+  'fruit'
 ];
 
 const mockedPartnerFileColumns = [
-  '列3', '列4', '列5'
+  'fruit'
 ];
 
 export const PsiLayout = () => {
@@ -165,18 +162,70 @@ export const PsiLayout = () => {
     setOutputDirectory(directoryPath);
   };
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-      const values = await form.validateFields();
-      console.log(values);
-      // const response = await axios.post(apiEndpoints.sendConfiguration, values);
-      message.success('请求发送成功');
-    } catch (error) {
-      message.error('请求发送失败');
-    } finally {
-      setLoading(false);
+  const [socketAlice, setSocketAlice] = useState(null);
+  const [socketBob, setSocketBob] = useState(null);
+  const [result, setResult] = useState('');
+
+  useEffect(() => {
+    const ws_alice = new WebSocket('ws://127.0.0.1:7000/ws');
+    const ws_bob = new WebSocket('ws://127.0.0.1:7001/ws');
+
+    ws_alice.onopen = () => {
+      console.log('Connected to WebSocket server');
+    };
+    ws_bob.onopen = () => {
+      console.log('Connected to WebSocket server');
+    };
+
+    ws_alice.onmessage = (event) => {
+      console.log('Received message from server:', event.data);
+      setResult(event.data);
+    };
+    ws_bob.onmessage = (event) => {
+      console.log('Received message from server:', event.data);
+      setResult(event.data);
+    };
+
+    ws_alice.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+    ws_bob.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    setSocketAlice(ws_alice);
+    setSocketBob(ws_bob);
+
+    return () => {
+      ws_alice.close();
+      ws_bob.close();
+    };
+  }, []);
+
+  const handleAliceSubmit = async () => {
+    setLoading(true);
+    let jsonData = await form.validateFields();
+    jsonData['rule'] = '0';
+    jsonData['curve'] = 'SECP256k1';
+    jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test/set_a.csv';
+    console.log(jsonData);
+    if (socketAlice && socketAlice.readyState === WebSocket.OPEN) {
+      socketAlice.send(JSON.stringify(jsonData));
     }
+    setLoading(false);
+  };
+
+  const handleBobSubmit = async () => {
+      setLoading(true);
+      let jsonData = await form.validateFields();
+      jsonData['rule'] = '1';
+      jsonData['curve'] = 'SECP256k1';
+      jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test/set_b.csv';
+      console.log(jsonData);
+      if (socketBob && socketBob.readyState === WebSocket.OPEN) {
+        socketBob.send(JSON.stringify(jsonData));
+      }
+      setLoading(false);
   };
 
   return (
@@ -202,8 +251,9 @@ export const PsiLayout = () => {
               <Form.Item name="protocol" label="使用协议"
                          rules={[{required: true, message: '请选择协议'}]}>
                 <Select placeholder="请选择协议">
-                  <Option value="protocol1">协议1</Option>
-                  <Option value="protocol2">协议2</Option>
+                  <Option value="bc22">BC22</Option>
+                  <Option value="ecdh">ECDH</Option>
+                  <Option value="kkrt">KKRT</Option>
                 </Select>
               </Form.Item>
 
@@ -313,12 +363,18 @@ export const PsiLayout = () => {
             </Form>
 
             {activeTab === '2' && (
-              <Button type="primary" onClick={handleSubmit} style={{marginBottom: 10}}>
-                发送请求
+              <Button type="primary" onClick={handleAliceSubmit} style={{marginBottom: 10}}>
+                给Alice发送请求
+              </Button>
+            )}
+            {activeTab === '2' && (
+              <Button type="primary" onClick={handleBobSubmit} style={{marginBottom: 10}}>
+                给Bob发送请求
               </Button>
             )}
           </TabPane>
         </Tabs>
+        {activeTab === '2' && (<div>Result: {result}</div>)}
       </div>
     </Spin>
   );
