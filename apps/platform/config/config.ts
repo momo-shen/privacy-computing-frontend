@@ -11,11 +11,11 @@ try {
   }
   proxyOptions = {
     proxy: {
-      '/api': {
+      '/pc/api': {
         target: config?.PROXY_URL,
-        changeOrigin: true,
-      },
-    },
+        changeOrigin: true
+      }
+    }
   };
 } catch (e) {
   console.warn('如果在本地开发，需要做api代理，可以手动在platform目录下增加.env文件');
@@ -40,16 +40,6 @@ export default defineConfig({
   codeSplitting: {
     jsStrategy: 'granularChunks',
   },
-  // oneApi: {
-  //   apps: [
-  //     {
-  //       name: 'secretpad', // 后端应用名
-  //       tag: 'feature/0.7.0b0', // 分支 tag
-  //       source: 'ZAPPINFO', // 应用来源，默认 ZAPPINFO，其他来源可在官网的应用信息中查看
-  //     },
-  //   ],
-  //   typescript: true, // 每个接口的类型定义，自动生成，默认 false
-  // },
   esbuildMinifyIIFE: true,
   ...proxyOptions,
 });
