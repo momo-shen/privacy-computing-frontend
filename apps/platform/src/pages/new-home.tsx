@@ -8,7 +8,6 @@ import { HomeLayout } from '@/modules/layout/home-layout';
 import { HomeLayoutService } from '@/modules/layout/home-layout/home-layout.service';
 import { ManagementLayoutComponent } from '@/modules/layout/management-layout';
 import { LoginService } from '@/modules/login/login.service';
-import { ManagedNodeListComponent } from '@/modules/managed-node-list';
 import { ProjectListComponent } from '@/modules/project-list';
 import { useModel } from '@/util/valtio-helper';
 
@@ -18,13 +17,6 @@ const menuItems: {
   component: React.ReactNode;
   key: string;
 }[] = [
-  {
-    label: '节点注册',
-    icon: <Icon component={ManagedNode} />,
-    component: <ManagedNodeListComponent />,
-    key: 'node-management',
-  },
-
   {
     label: '项目管理',
     icon: <Icon component={projectManager} />,

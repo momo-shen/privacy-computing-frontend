@@ -8,7 +8,6 @@ import { useLocation, history } from 'umi';
 import { AccessWrapper, Platform, hasAccess } from '@/components/platform-wrapper';
 import { useModel } from '@/util/valtio-helper';
 
-import { NodeState } from '../managed-node-list';
 
 import { CooperativeNodeService } from './cooperative-node.service';
 
@@ -286,7 +285,7 @@ export const AddCooperativeNodeDrawer = ({
                   options={computeNodeList
                     .filter(
                       (item) =>
-                        item.nodeId !== nodeId && item.nodeStatus === NodeState.READY,
+                        item.nodeId !== nodeId,
                     )
                     .map((item) => ({
                       value: item.nodeId,

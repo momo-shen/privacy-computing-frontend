@@ -145,31 +145,6 @@ export const P2pProjectButtons = (props: { project: API.ProjectVO }) => {
 
   const p2pProjectService = useModel(P2pProjectListService);
 
-  const handleArchiveProject = (projectInfo: API.ProjectVO) => {
-    // 未达成合作的项目以及达成合作的项目点击归档，需要发起审批进行归档
-    confirmArchive({
-      title: `确认要将「${projectInfo.projectName}」归档吗？`,
-      description: checkAllApproved(projectInfo)
-        ? '归档后会向合作节点发出归档申请，所有合作节点同意后才可归档，归档后，正在运行的任务和发布的模型服务不受影响，但不可新建任务和服务'
-        : '',
-      onOk: () => {
-        if (checkAllApproved(projectInfo)) {
-          p2pProjectService.ArchiveProject(
-            true,
-            projectInfo.projectId,
-            projectInfo.projectName,
-          );
-        } else {
-          p2pProjectService.ArchiveProject(
-            false,
-            projectInfo.projectId,
-            projectInfo.projectName,
-          );
-        }
-      },
-    });
-  };
-
   const [visible, setVisible] = React.useState(false);
   const [data, setData] = React.useState<API.ProjectVO | undefined>();
 
@@ -227,15 +202,6 @@ export const P2pProjectButtons = (props: { project: API.ProjectVO }) => {
       )} */}
       {/* 只有审批成功才发起归档审批 */}
       {/* 待审批状态只有发起者才能发起审批 */}
-      {projectCanArchived(project, nodeId as string) && (
-        <Button
-          size="small"
-          onClick={() => handleArchiveProject(project)}
-          style={{ flex: 1 }}
-        >
-          归档
-        </Button>
-      )}
     </>
   );
 };

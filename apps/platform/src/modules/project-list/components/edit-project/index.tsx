@@ -11,8 +11,8 @@ export const EditProjectModal = ({
 }: {
   isModalOpen: boolean;
   handleCancel: () => void;
-  data: API.ProjectVO;
-  onEdit: (item: API.ProjectVO, projectId: string) => Promise<void>;
+  data;
+  onEdit: (item, projectId: string) => Promise<void>;
 }) => {
   const [form] = Form.useForm();
   const handleOk = () => {

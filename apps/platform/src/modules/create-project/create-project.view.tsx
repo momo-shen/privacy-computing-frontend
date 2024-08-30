@@ -8,15 +8,10 @@ import { AccessWrapper, PadMode, hasAccess } from '@/components/platform-wrapper
 import { LoginService } from '@/modules/login/login.service';
 import { Model, getModel, useModel } from '@/util/valtio-helper';
 
-import { GuideTourKeys, GuideTourService } from '../guide-tour/guide-tour-service';
-import { QuickConfigEntry } from '../pipeline/pipeline-creation-view';
-import { PipelineTemplateType } from '../pipeline/pipeline-protocol';
-
 import { AddNodeTag } from './add-node-tag';
 import { CreateProjectService } from './create-project.service';
 import { EmbeddedNodePreview } from './embedded-node.view';
 import styles from './index.less';
-import { TemplateSwitch } from './template-switch';
 
 interface ICreateProjectModal {
   visible: boolean;
@@ -55,23 +50,6 @@ export const CreateProjectModal = ({ visible, data, close }: ICreateProjectModal
   }, [loginService.userInfo]);
 
   const handleOk = () => {
-    form.validateFields().then(async (value) => {
-      viewInstance.createLoading = true;
-      try {
-        await service.createProject(value, data.showBlank);
-        data.showBlank &&
-          value.templateId !== PipelineTemplateType.BLANK &&
-          message.success({
-            content: <QuickConfigEntry type={value.templateId} />,
-            duration: 15,
-            key: 'quick-config',
-          });
-      } catch (e) {
-        message.error(e.message);
-      }
-      viewInstance.createLoading = false;
-      close();
-    });
   };
 
   React.useEffect(() => {
@@ -194,13 +172,6 @@ export const CreateProjectModal = ({ visible, data, close }: ICreateProjectModal
           name="templateId"
           required
         >
-          <TemplateSwitch
-            visible={visible}
-            viewInstance={viewInstance}
-            templateList={service.pipelineTemplates}
-            showBlank={data.showBlank}
-            computeMode={computeMode}
-          />
         </Form.Item>
         <Form.Item
           className={styles.formBoldLabelItem}
@@ -232,11 +203,8 @@ export const CreateProjectModal = ({ visible, data, close }: ICreateProjectModal
 export class CreateProjectModalView extends Model {
   createLoading = false;
 
-  guideTourService = getModel(GuideTourService);
-
   createProjectService = getModel(CreateProjectService);
 
   closeGuideTour() {
-    this.guideTourService.finishTour(GuideTourKeys.CreateProjectTour);
   }
 }

@@ -3,13 +3,13 @@
 // DO NOT CHANGE IT MANUALLY!
 import React, { useEffect, useState } from 'react';
 import { ApplyPluginsType } from 'umi';
-import { renderClient, RenderClientOpts } from 'D:/Downloads/privacy-computing-frontend-main/node_modules/.pnpm/@umijs+renderer-react@4.1.0_react-dom@18.1.0_react@18.1.0/node_modules/@umijs/renderer-react';
+import { renderClient, RenderClientOpts } from 'D:/dev_projects/privacy-computing-frontend/node_modules/.pnpm/@umijs+renderer-react@4.1.0_react-dom@18.1.0_react@18.1.0__react@18.1.0/node_modules/@umijs/renderer-react';
 import { createHistory } from './core/history';
 import { createPluginManager } from './core/plugin';
 import { getRoutes } from './core/route';
 import type { Location } from 'history';
 
-import 'D:/Downloads/privacy-computing-frontend-main/apps/platform/src/global.less';
+import 'D:/dev_projects/privacy-computing-frontend/apps/platform/src/global.less';
 const publicPath = '/';
 const runtimePublicPath = false;
 

@@ -10,12 +10,7 @@ import { parse } from 'query-string';
 import type { ChangeEvent } from 'react';
 
 import { AccessWrapper, Platform } from '@/components/platform-wrapper';
-import { page as requestList } from '@/services/secretpad/NodeRouteController';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
-
-import { formatTimestamp } from '../dag-result/utils';
-import { NodeState, NodeStateText } from '../managed-node-list';
-import { NodeService } from '../node/node.service';
 
 import { AddCooperativeNodeDrawer } from './add-cooperative-node-modal';
 import { CooperativeNodeDetailDrawer } from './cooperative-node-detail-modal';
@@ -123,99 +118,24 @@ export const CooperativeNodeListComponent = () => {
       title: '通讯状态',
       dataIndex: 'status',
       key: 'status',
-      width: '18%',
-      render: (nodeStatus: NodeState, record) => (
-        <>
-          <Badge
-            status={NodeStateText[nodeStatus || NodeState.UNKNOWN].icon}
-            text={NodeStateText[nodeStatus || NodeState.UNKNOWN].text}
-          />
-          <Button
-            type="link"
-            icon={<ReloadOutlined />}
-            onClick={() => {
-              service.refreshNode(record.routeId || '');
-              viewInstance.getNodeList();
-            }}
-          >
-            刷新
-          </Button>
-        </>
-      ),
+      width: '18%'
     },
     {
       title: '合作时间',
       dataIndex: 'gmtCreate',
       width: '15%',
-      sorter: true,
-      render: (gmtCreate: string) => (
-        <div style={{ width: 80 }}>{formatTimestamp(gmtCreate as string)}</div>
-      ),
+      sorter: true
     },
     {
       title: '编辑时间',
       dataIndex: 'gmtModified',
       width: '15%',
-      sorter: true,
-      render: (gmtModified: string) => (
-        <div style={{ width: 80 }}>{formatTimestamp(gmtModified as string)}</div>
-      ),
+      sorter: true
     },
     {
       title: '操作',
       key: 'action',
-      width: '15%',
-      render: (_, record: API.NodeRouterVO) => {
-        return (
-          <div className={styles.action}>
-            {record?.dstNode?.type === 'embedded' &&
-            record?.srcNode?.type === 'embedded' ? (
-              '- -'
-            ) : (
-              <Space>
-                <Button
-                  type="link"
-                  onClick={() => {
-                    viewInstance.showEditModal = true;
-                    viewInstance.clickedCooperativeNode = record;
-                  }}
-                >
-                  编辑
-                </Button>
-                <AccessWrapper accessType={{ type: [Platform.AUTONOMY] }}>
-                  <Tooltip
-                    title={
-                      record.isProjectJobRunning ? '有正在运行中的任务,不可删除' : ''
-                    }
-                  >
-                    <Button
-                      type="link"
-                      onClick={() => {
-                        viewInstance.showDeleteModal = true;
-                        viewInstance.clickedCooperativeNode = record;
-                      }}
-                      disabled={record.isProjectJobRunning}
-                    >
-                      删除
-                    </Button>
-                  </Tooltip>
-                </AccessWrapper>
-                <AccessWrapper accessType={{ type: [Platform.CENTER, Platform.EDGE] }}>
-                  <Button
-                    type="link"
-                    onClick={() => {
-                      viewInstance.showDeleteModal = true;
-                      viewInstance.clickedCooperativeNode = record;
-                    }}
-                  >
-                    删除
-                  </Button>
-                </AccessWrapper>
-              </Space>
-            )}
-          </div>
-        );
-      },
+      width: '15%'
     },
   ];
 
@@ -237,14 +157,11 @@ export const CooperativeNodeListComponent = () => {
           />
         </Space>
         <Tooltip
-          title={
-            service.nodeInfo.nodeStatus !== NodeState.READY ? '当前节点状态不可用' : ''
-          }
+          title='title'
         >
           <Button
             type="primary"
             onClick={() => (viewInstance.showAddCooperativeNodeDrawer = true)}
-            disabled={service.nodeInfo.nodeStatus !== NodeState.READY}
           >
             添加合作节点
           </Button>
@@ -310,9 +227,9 @@ export const CooperativeNodeListComponent = () => {
 };
 
 export class CooperativeNodeView extends Model {
-  nodeList: API.NodeRouterVO[] = [];
+  nodeList = [];
 
-  nodeListDisplay: API.NodeResultsVO[] = [];
+  nodeListDisplay = [];
 
   search = '';
 
@@ -338,7 +255,6 @@ export class CooperativeNodeView extends Model {
   clickedCooperativeNode: API.NodeRouterVO | undefined = undefined;
   drawerId = '';
 
-  nodeService = getModel(NodeService);
   CooperativeNodeService = getModel(CooperativeNodeService);
 
   onViewMount() {
@@ -349,13 +265,7 @@ export class CooperativeNodeView extends Model {
     const { nodeId } = parse(window.location.search);
     if (!nodeId) return;
     this.loading = true;
-    const list = await requestList({
-      page: this.pageNumber,
-      size: this.pageSize,
-      search: this.search,
-      sort: this.sortRule,
-      nodeId: nodeId as string,
-    });
+    const list = []
     this.loading = false;
     this.totalNum = list?.data?.total || 0;
     this.nodeList = list?.data?.list || [];

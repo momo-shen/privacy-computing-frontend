@@ -11,7 +11,6 @@ import { history, useLocation } from 'umi';
 
 import { EdgeRouteWrapper, isP2PWorkbench } from '@/components/platform-wrapper';
 import { P2PCreateProjectModal } from '@/modules/create-project/p2p-create-project/p2p-create-project.view';
-import { formatTimestamp } from '@/modules/dag-result/utils';
 import { EditProjectModal } from '@/modules/project-list/components/edit-project';
 import {
   ProjectNodePopover,
@@ -273,10 +272,6 @@ export const P2pProjectListComponent: React.FC = () => {
                           </div>
                         </div>
                       )}
-
-                      <div className={styles.time}>
-                        创建于{formatTimestamp(item.gmtCreate as string)}
-                      </div>
                     </div>
                     <div className={styles.bootom}>
                       <P2pProjectButtons project={item} />

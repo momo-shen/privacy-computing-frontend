@@ -20,18 +20,13 @@ import Logo from '@/assets/logo.svg';
 import fallbackLink from '@/assets/offline-user.png';
 import { EdgeAuthWrapper } from '@/components/edge-wrapper-auth';
 import { hasAccess, Platform } from '@/components/platform-wrapper';
-import { GuideTourService } from '@/modules/guide-tour/guide-tour-service';
-import { ChangePasswordModal } from '@/modules/login/component/change-password';
 import { LoginService } from '@/modules/login/login.service';
 import platformConfig from '@/platform.config';
-import { logout } from '@/services/secretpad/AuthController';
-import { get } from '@/services/secretpad/NodeController';
 import { getImgLink } from '@/util/tracert-helper';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
 import { HomeLayoutService } from './home-layout.service';
 import styles from './index.less';
-import { VersionService } from './version-service';
 
 type IAvatarMapping = Record<
   Platform,
@@ -69,7 +64,6 @@ export const HeaderComponent = () => {
   const viewInstance = useModel(HeaderModel);
   const layoutService = useModel(HomeLayoutService);
   const loginService = useModel(LoginService);
-  const versionService = useModel(VersionService);
 
   const { search, pathname } = useLocation();
   const { nodeId } = parse(search);
@@ -77,75 +71,17 @@ export const HeaderComponent = () => {
   const [avatarLink, setAvatarLink] = useState('');
   const [avatarOfflineLink, setAvatarOfflineLink] = useState('');
 
-  const onLogout = async () => {
-    await logout(
-      {},
-      {
-        name: loginService?.userInfo?.name,
-      },
-    );
+  const onLogout = () => {
     history.push('/login');
   };
 
-  const content = (
-    <Spin spinning={versionService.loading}>
-      <div className={styles.headerDropdown}>
-        {versionService.versionList.length === 0 ? (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-        ) : (
-          <Space direction="vertical">
-            {versionService.versionList.map((item) => {
-              return <div key={item.name}>{`${item.name}版本：${item.version}`}</div>;
-            })}
-          </Space>
-        )}
-      </div>
-    </Spin>
-  );
-
-  const handleOpenChange = async (open: boolean) => {
-    if (open) {
-      await versionService.getVersion();
-    }
-  };
-
   const items = [
-    {
-      key: 'version',
-      label: (
-        <Popover
-          content={content}
-          trigger="hover"
-          placement="left"
-          onOpenChange={handleOpenChange}
-        >
-          组件版本
-        </Popover>
-      ),
-    },
-    {
-      key: 'changePassword',
-      label: <div onClick={viewInstance.showChangePassword}>修改密码</div>,
-    },
     {
       key: 'logout',
       icon: <LogoutOutlined onClick={onLogout} />,
       label: <div onClick={onLogout}>退出</div>,
     },
   ];
-
-  useEffect(() => {
-    const getNodeName = async (nodeId: string) => {
-      if (!nodeId) return;
-      const info = await get({
-        nodeId,
-      });
-      viewInstance.nodeName = info.data?.nodeName || '';
-    };
-    if (viewInstance.showMyNode(pathname)) {
-      getNodeName(nodeId as string);
-    }
-  }, []);
 
   useEffect(() => {
     if (!loginService?.userInfo) return;
@@ -162,34 +98,6 @@ export const HeaderComponent = () => {
       setAvatarLink(imgLink);
     }
   }, [loginService?.userInfo]);
-
-  // if (viewInstance.showMyNode()) {
-  //   items.push({
-  //     key: 'myNode',
-  //     icon: (
-  //       <HddOutlined
-  //         onClick={() =>
-  //           history.push({
-  //             pathname: '/my-node',
-  //             search: `nodeId=${nodeId}`,
-  //           })
-  //         }
-  //       />
-  //     ),
-  //     label: (
-  //       <div
-  //         onClick={() =>
-  //           history.push({
-  //             pathname: '/my-node',
-  //             search: `nodeId=${nodeId}`,
-  //           })
-  //         }
-  //       >
-  //         我的节点
-  //       </div>
-  //     ),
-  //   });
-  // }
 
   return (
     <div className={styles['header-items']}>
@@ -229,83 +137,6 @@ export const HeaderComponent = () => {
         )}
       </div>
       <div className={styles.right}>
-        {/* {layoutService.showBackButton && (
-          <>
-            <span
-              className={styles.community}
-              onClick={() => history.push('/home?tab=project-management')}
-            >
-              <SwapOutlined />
-              返回工作台
-            </span>
-            <span className={styles.line} />
-          </>
-        )} */}
-
-        {platformConfig.guide && viewInstance.showGuide(pathname) && (
-          <div className={styles.contentHeaderRight}>
-            <EdgeAuthWrapper>
-              <Button
-                type="primary"
-                shape="round"
-                size="small"
-                className={styles.smallGirlText}
-                onClick={() => {
-                  viewInstance.reExperience();
-                }}
-              >
-                体验新手引导
-              </Button>
-            </EdgeAuthWrapper>
-          </div>
-        )}
-
-        {platformConfig.header.rightLinks === true && (
-          <>
-            {/* <span
-              className={styles.community}
-              onClick={() =>
-                viewInstance.goto('https://github.com/orgs/secretflow/discussions')
-              }
-            >
-              <GlobalOutlined />
-              隐语开源社区
-            </span> */}
-            {/* <span className={styles.line} /> */}
-            {/* <span
-              className={styles.help}
-              onClick={() => viewInstance.goto('https://www.secretflow.org.cn/docs')}
-            >
-              <ReadOutlined />
-              帮助中心
-            </span> */}
-            {/* {viewInstance.showGoToHome(pathname) && <span className={styles.line} />} */}
-          </>
-        )}
-        {viewInstance.showMessage(pathname) && (
-          <>
-            <span
-              className={styles.community}
-              onClick={() =>
-                history.push({
-                  pathname: '/message',
-                  search: `nodeId=${nodeId}&active=process`,
-                })
-              }
-            >
-              <BellOutlined />
-              <Badge
-                size="small"
-                className={styles.messageBadge}
-                offset={[4, -6]}
-                count={layoutService.messageCount}
-                overflowCount={10}
-              >
-                消息中心
-              </Badge>
-            </span>
-          </>
-        )}
         {<>{platformConfig.header.rightLinks}</>}
         <span className={styles.loginline} />
         <Dropdown
@@ -327,10 +158,6 @@ export const HeaderComponent = () => {
             </Space>
           </div>
         </Dropdown>
-        <ChangePasswordModal
-          visible={viewInstance.showChangePasswordModel}
-          close={() => (viewInstance.showChangePasswordModel = false)}
-        />
       </div>
     </div>
   );
@@ -338,7 +165,6 @@ export const HeaderComponent = () => {
 
 export class HeaderModel extends Model {
   homeLayoutService = getModel(HomeLayoutService);
-  guideTourService = getModel(GuideTourService);
 
   nodeName = '';
 
@@ -358,26 +184,5 @@ export class HeaderModel extends Model {
   showMyNode = (path: string) => {
     const pathnameToShowNode = ['/node', '/message', '/edge'];
     return pathnameToShowNode.indexOf(path) > -1;
-  };
-
-  showMessage = (path: string) => {
-    const pathnameToShowNode = ['/node', '/message', '/edge'];
-    return pathnameToShowNode.indexOf(path) > -1;
-  };
-
-  showGuide = (path: string) => {
-    const pathnameToShowGuide = ['/', '/home'];
-    return pathnameToShowGuide.indexOf(path) > -1;
-  };
-
-  showChangePassword = () => {
-    this.showChangePasswordModel = true;
-  };
-
-  reExperience = () => {
-    this.guideTourService.reset();
-    history.push({
-      pathname: '/guide',
-    });
   };
 }
