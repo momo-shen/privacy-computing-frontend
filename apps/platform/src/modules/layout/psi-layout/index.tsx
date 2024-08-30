@@ -207,7 +207,7 @@ export const PsiLayout = () => {
     let jsonData = await form.validateFields();
     jsonData['rule'] = '0';
     jsonData['curve'] = 'SECP256k1';
-    jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test/set_a.csv';
+    jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_a.csv';
     console.log(jsonData);
     if (socketAlice && socketAlice.readyState === WebSocket.OPEN) {
       socketAlice.send(JSON.stringify(jsonData));
@@ -220,7 +220,7 @@ export const PsiLayout = () => {
       let jsonData = await form.validateFields();
       jsonData['rule'] = '1';
       jsonData['curve'] = 'SECP256k1';
-      jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test/set_b.csv';
+      jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_b.csv';
       console.log(jsonData);
       if (socketBob && socketBob.readyState === WebSocket.OPEN) {
         socketBob.send(JSON.stringify(jsonData));

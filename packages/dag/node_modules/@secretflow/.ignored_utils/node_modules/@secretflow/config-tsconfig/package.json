@@ -1,8 +1,0 @@
-{
-  "name": "@secretflow/config-tsconfig",
-  "version": "0.0.0",
-  "private": true,
-  "publishConfig": {
-    "access": "public"
-  }
-}

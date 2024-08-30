@@ -4,7 +4,6 @@ import { history } from 'umi';
 
 import { ReactComponent as Logo } from '@/assets/logo.svg';
 import {type PadMode, Platform} from '@/components/platform-wrapper';
-import { DefaultComponentInterpreterService } from '@/modules/component-interpreter/component-interpreter-service';
 import platformConfig from '@/platform.config';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
@@ -31,7 +30,6 @@ export const LoginComponent: React.FC = () => {
 export class LoginModel extends Model {
   token = '';
   loginService = getModel(LoginService);
-  interpreterService = getModel(DefaultComponentInterpreterService);
 
   loginConfirm = async (loginFields: UserInfo) => {
 
@@ -59,8 +57,6 @@ export class LoginModel extends Model {
           localStorage.setItem('neverLogined', 'true');
           history.push(`/edge?nodeId=${this.loginService.userInfo.ownerId}`);
           message.success('登录成功');
-          // 防止token失效后,直接刷新页面，重新登陆接口未重新调用
-          this.interpreterService.getComponentI18n();
           return;
         }
       }
@@ -89,8 +85,6 @@ export class LoginModel extends Model {
         }
       }
       message.success('登录成功');
-      // 防止token失效后,直接刷新页面，重新登陆接口未重新调用
-      this.interpreterService.getComponentI18n();
     } else {
       message.error(status?.msg || '登录失败，请检查用户名或密码');
     }

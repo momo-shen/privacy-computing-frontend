@@ -22,14 +22,8 @@ import { useEffect, useState } from 'react';
 import React, { useRef } from 'react';
 import { history } from 'umi';
 
-import { EdgeAuthWrapper } from '@/components/edge-wrapper-auth';
 import { getPadMode } from '@/components/platform-wrapper';
 import { CreateProjectModal } from '@/modules/create-project/create-project.view';
-import { formatTimestamp } from '@/modules/dag-result/utils';
-import {
-  GuideTourKeys,
-  GuideTourService,
-} from '@/modules/guide-tour/guide-tour-service';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
 import { EditProjectModal } from './components/edit-project';
@@ -251,7 +245,7 @@ export const ProjectListComponent: React.FC = () => {
                   </div>
                 </div>
                 <div className={styles.time}>
-                  创建于{formatTimestamp(item.gmtCreate as string)}
+                  创建于XX
                 </div>
               </div>
               <div className={styles.bootom}>
@@ -296,34 +290,20 @@ export const ProjectListComponent: React.FC = () => {
         data={editProjectData}
         onEdit={projectListModel.endEdit}
       />
-      <EdgeAuthWrapper>
-        <Tour
-          open={
-            !projectListModel.guideTourService.ProjectListTour &&
-            projectList.length === 1
-          }
-          onClose={() => projectListModel.closeGuideTour()}
-          mask={false}
-          type="primary"
-          steps={steps}
-          placement="right"
-          prefixCls="project-list-tour"
-        />
-      </EdgeAuthWrapper>
     </div>
   );
 };
 
 export class ProjectListModel extends Model {
-  pipelines: API.GraphMetaVO[] = [];
+  pipelines = [];
 
   fetchingPipelineList = false;
 
   fetchingTaskList = false;
 
-  jobs: API.ProjectJobSummaryVO[] = [];
+  jobs = [];
 
-  displayProjectList: API.ProjectVO[] = [];
+  displayProjectList = [];
 
   projectEditStatusMap: { [key: string]: boolean } = {};
 
@@ -332,19 +312,13 @@ export class ProjectListModel extends Model {
   showCreateProjectModel = false;
 
   readonly projectListService;
-  readonly guideTourService;
 
   constructor() {
     super();
     this.projectListService = getModel(ProjectListService);
-    this.guideTourService = getModel(GuideTourService);
   }
 
-  closeGuideTour() {
-    this.guideTourService.finishTour(GuideTourKeys.ProjectListTour);
-  }
-
-  endEdit = async (item: API.ProjectVO, projectId: string) => {
+  endEdit = async (item, projectId: string) => {
     const params = {
       projectId,
       name: item.projectName as string,
@@ -361,7 +335,7 @@ export class ProjectListModel extends Model {
     this.displayProjectList = await this.projectListService.getListProject();
   }
 
-  async getPipelines(projectInfo: API.ProjectVO) {
+  async getPipelines(projectInfo) {
     this.fetchingPipelineList = true;
     const pipelines = await this.projectListService.getPipelines(
       projectInfo.projectId || '',
@@ -370,10 +344,10 @@ export class ProjectListModel extends Model {
     this.fetchingPipelineList = false;
   }
 
-  async getJobs(projectInfo: API.ProjectVO) {
+  async getJobs(projectInfo) {
     this.fetchingTaskList = true;
     const jobs = await this.projectListService.getJobs(projectInfo.projectId || '');
-    this.jobs = (jobs as API.PageResponse_ProjectJobSummaryVO_).data || [];
+    this.jobs = jobs.data || [];
     this.fetchingTaskList = false;
   }
 

@@ -27,7 +27,7 @@
         "src/.umi/*"
       ],
       "umi": [
-        "D:\\Downloads\\privacy-computing-frontend-main\\node_modules\\.pnpm\\umi@4.1.0_@babel+core@7.23.7_@types+node@20.5.1_@types+react@18.2.47_eslint@8.56.0_jest@29.7._sostveixj2s6k6z5wgi72ulkai\\node_modules\\umi"
+        "D:\\dev_projects\\privacy-computing-frontend\\node_modules\\.pnpm\\umi@4.1.0_@babel+core@7.23.7_@types+node@20.11.0_@types+react@18.2.47_eslint@7.32.0_jest@29.7_uhv5a5pngozhxiqcolq3n4h73i\\node_modules\\umi"
       ],
       "umi/typings": [
         "src/.umi/typings"

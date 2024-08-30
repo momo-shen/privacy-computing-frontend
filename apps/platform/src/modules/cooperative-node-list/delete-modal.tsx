@@ -31,22 +31,7 @@ export const DeleteCooperativeNodeModal = ({
   }, []);
 
   const handleDelete = async () => {
-    if (hasAccess({ type: [Platform.AUTONOMY] })) {
-      const { status } = await service.p2pDeleteCooperativeNode(data.routeId || '');
-      if (status && status.code !== 0) {
-        messageApi.error(status.msg);
-        return;
-      }
-    } else {
-      const { status } = await service.deleteCooperativeNode(data.routeId || '');
-      if (status && status.code !== 0) {
-        messageApi.error(status.msg);
-        return;
-      }
-    }
-    onOk();
-    messageApi.success('删除成功!');
-    onClose();
+
   };
 
   return (

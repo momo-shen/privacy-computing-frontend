@@ -9,10 +9,6 @@ import { EllipsisText } from '@/components/text-ellipsis.tsx';
 import { EllipsisMiddle } from '@/components/text-ellipsis.tsx';
 import { useModel } from '@/util/valtio-helper';
 
-import { formatTimestamp } from '../dag-result/utils';
-import { NodeState } from '../managed-node-list';
-import { NodeStateText } from '../managed-node-list';
-
 import { CooperativeNodeService } from './cooperative-node.service';
 import { DeleteCooperativeNodeModal } from './delete-modal';
 import { EditCooperativeNodeModal } from './edit-modal';
@@ -156,16 +152,8 @@ export const CooperativeNodeDetailDrawer = ({
           <Descriptions.Item label="通讯状态">
             <div>
               <Badge
-                status={
-                  NodeStateText[
-                    (cooperativeNodeDetail?.status as NodeState) || NodeState.UNKNOWN
-                  ].icon
-                }
-                text={
-                  NodeStateText[
-                    (cooperativeNodeDetail?.status as NodeState) || NodeState.UNKNOWN
-                  ].text
-                }
+                status="default"
+                text="text"
               />
               <Button
                 type="link"
@@ -185,14 +173,10 @@ export const CooperativeNodeDetailDrawer = ({
             </div>
           </Descriptions.Item>
           <Descriptions.Item label="合作时间">
-            <EllipsisText>
-              {formatTimestamp(cooperativeNodeDetail.gmtCreate || '')}
-            </EllipsisText>
+
           </Descriptions.Item>
           <Descriptions.Item label="编辑时间">
-            <EllipsisText>
-              {formatTimestamp(cooperativeNodeDetail.gmtModified || '')}
-            </EllipsisText>
+
           </Descriptions.Item>
         </Descriptions>
       </Spin>

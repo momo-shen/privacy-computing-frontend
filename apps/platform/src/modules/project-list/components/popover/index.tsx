@@ -2,7 +2,6 @@ import { HddOutlined, LoadingOutlined } from '@ant-design/icons';
 import { Badge, Empty, Popover, Space, Spin, Tag } from 'antd';
 import classNames from 'classnames';
 
-import { formatTimestamp } from '@/modules/dag-result/utils';
 import { useModel } from '@/util/valtio-helper';
 
 import { ProjectListModel } from '../../index';
@@ -10,7 +9,7 @@ import { ProjectListModel } from '../../index';
 import styles from './index.less';
 
 interface IProps {
-  project: API.ProjectVO;
+  project;
   isP2P?: boolean;
   currentId?: string;
 }
@@ -97,7 +96,7 @@ export const ProjectPipeLinePopover = (props: IProps) => {
   );
 };
 
-const mapStatusToBadge = (status: API.GraphJobStatus) => {
+const mapStatusToBadge = (status) => {
   switch (status.toLowerCase()) {
     case 'running':
       return 'processing';
@@ -137,10 +136,9 @@ export const ProjectTaskPopover = (props: IProps) => {
                   >
                     <Space>
                       <Badge
-                        status={mapStatusToBadge(job.status as API.GraphJobStatus)}
+                        status={mapStatusToBadge(job.status)}
                         text=""
                       />
-                      <span>{formatTimestamp(job.gmtCreate as string)}</span>
                     </Space>
                     <div className={styles.jobItemID}>ID: {job.jobId}</div>
                   </div>

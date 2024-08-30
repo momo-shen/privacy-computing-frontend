@@ -1,25 +1,18 @@
 import Icon from '@ant-design/icons';
 // import { Button } from 'antd';
-import { ShowMenuContext, Portal } from '@secretflow/dag';
 import classNames from 'classnames';
 import { useState } from 'react';
 
 import { ReactComponent as Fold } from '@/assets/fold.svg';
 import { ReactComponent as Unfold } from '@/assets/unfold.svg';
-import { MessageComponent } from '@/modules/message-center';
 import { P2pProjectListComponent } from '@/modules/p2p-project-list';
 
-import { GuidePipeline } from './component/guide-pipeline/ guide-pipeline';
 import styles from './index.less';
 
 export const P2PWorkbenchComponent = () => {
   const [isUnfold, setIsUnfold] = useState(true);
-  const X6ReactPortalProvider = Portal.getProvider();
   return (
     <div className={styles.main}>
-      <ShowMenuContext.Provider value={false}>
-        <X6ReactPortalProvider />
-      </ShowMenuContext.Provider>
       <div className={classNames(styles.mainContent, styles.header)}>
         <div className={classNames(styles.titleContent, styles.flexContent)}>
           <div className={styles.title}>
@@ -65,12 +58,6 @@ export const P2PWorkbenchComponent = () => {
             </div> */}
           </div>
         )}
-      </div>
-      <div className={classNames(styles.mainContent, styles.message)}>
-        <div className={styles.eventTitle}>申请事项</div>
-        <div className={styles.messageCard}>
-          <MessageComponent />
-        </div>
       </div>
       <div className={classNames(styles.mainContent, styles.project)}>
         <P2pProjectListComponent />

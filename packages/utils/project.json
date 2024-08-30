@@ -1,7 +1,0 @@
-{
-  "$schema": "https://cdn.jsdelivr.net/npm/nx@latest/schemas/project-schema.json",
-  "targets": {
-    "lint": {},
-    "ci": {}
-  }
-}

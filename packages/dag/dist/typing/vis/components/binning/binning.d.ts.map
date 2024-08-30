@@ -1,1 +1,0 @@
-{"version":3,"file":"binning.d.ts","sourceRoot":"","sources":["../../../../../src/vis/components/binning/binning.tsx"],"names":[],"mappings":"AAEA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,OAAO,KAAK,EAAE,UAAU,EAAE,MAAM,WAAW,CAAC;AAK5C,OAAO,cAAc,CAAC;AAItB,MAAM,WAAW,YAAY;IAC3B,IAAI,EAAE,UAAU,CAAC;CAClB;AAED,eAAO,MAAM,OAAO,EAAE,KAAK,CAAC,EAAE,CAAC,YAAY,CAsC1C,CAAC"}

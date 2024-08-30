@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "secretpad",
+  "proxy": "http://localhost:9000",
   "scripts": {
     "dev": "umi dev",
     "build": "umi build",
@@ -25,8 +26,6 @@
     "@antv/x6-plugin-keyboard": "2.2.1",
     "@antv/x6-plugin-selection": "^2.1.7",
     "@antv/x6-react-shape": "^2.2.2",
-    "@secretflow/dag": "workspace:^",
-    "@secretflow/utils": "workspace:^",
     "ahooks": "^3.7.8",
     "classnames": "^2.3.2",
     "crypto-js": "^4.1.1",
