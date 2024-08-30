@@ -1,7 +1,6 @@
 {
   "private": true,
   "name": "secretpad",
-  "proxy": "http://localhost:9000",
   "scripts": {
     "dev": "umi dev",
     "build": "umi build",

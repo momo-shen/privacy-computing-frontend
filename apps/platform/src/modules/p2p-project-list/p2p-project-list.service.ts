@@ -1,7 +1,6 @@
-import { message } from 'antd';
 import { parse } from 'query-string';
 
-import { isP2PWorkbench } from '@/components/platform-wrapper';
+import API from '@/services';
 import { Model } from '@/util/valtio-helper';
 
 import type { StatusEnum } from './components/auth-project-tag';
@@ -30,7 +29,8 @@ export class P2pProjectListService extends Model {
 
   getListProject = async () => {
     this.projectListLoading = true;
-    const data = [];
+    const response = await API.PsiController.getListProject();
+    const data = response.requests;
     this.projectList = data || [];
     this.projectListLoading = false;
     this.displayProjectList = this.projectList.reverse();

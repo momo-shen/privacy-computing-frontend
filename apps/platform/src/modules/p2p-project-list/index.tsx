@@ -1,5 +1,5 @@
-import { EditOutlined, SearchOutlined } from '@ant-design/icons';
-import { Empty, Tag } from 'antd';
+import {SearchOutlined} from '@ant-design/icons';
+import {Empty, Table, Tag} from 'antd';
 import { Button, Typography, Tooltip, Input, Space } from 'antd';
 import { Spin } from 'antd';
 import classNames from 'classnames';
@@ -12,36 +12,62 @@ import { history, useLocation } from 'umi';
 import { EdgeRouteWrapper, isP2PWorkbench } from '@/components/platform-wrapper';
 import { P2PCreateProjectModal } from '@/modules/create-project/p2p-create-project/p2p-create-project.view';
 import { EditProjectModal } from '@/modules/project-list/components/edit-project';
-import {
-  ProjectNodePopover,
-  ProjectPipeLinePopover,
-  ProjectTaskPopover,
-} from '@/modules/project-list/components/popover';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
-import { AuthProjectTag } from '../p2p-project-list/components/auth-project-tag';
 import {
   SelectProjectState,
-  checkAllApproved,
 } from '../p2p-project-list/components/common';
 import {
   ComputeModeType,
-  P2pProjectButtons,
-  ProjectComputeModeSelect,
-  ProjectStateSelect,
-  ProjectStatus,
   RadioGroup,
   RadioGroupState,
-  computeModeText,
 } from '../p2p-project-list/components/common';
 
-import { ProjectTypeTag } from './components/project-type-tag';
 import styles from './index.less';
 import { P2pProjectListService } from './p2p-project-list.service';
+import type {FilterValue} from "antd/es/table/interface";
 
 export const P2pProjectListComponent: React.FC = () => {
   const projectListModel = useModel(ProjectListModel);
   const p2pProjectService = useModel(P2pProjectListService);
+
+  const columns = [
+    {
+      title: '项目名称',
+      dataIndex: 'projectName',
+      key: 'projectName',
+      width: '15%',
+    },
+    {
+      title: '发起节点',
+      dataIndex: 'senderId',
+      key: 'senderId',
+      width: '15%'
+    },
+    {
+      title: '合作节点',
+      dataIndex: 'receiverId',
+      key: 'receiverId',
+      width: '15%'
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      width: '15%'
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      width: '15%',
+      sorter: true
+    },
+    {
+      title: '操作',
+      key: 'action',
+      width: '15%'
+    },
+  ];
 
   const { pathname } = useLocation();
 
@@ -121,14 +147,6 @@ export const P2pProjectListComponent: React.FC = () => {
                 value={projectListModel.radioFilterState}
                 onChange={projectListModel.changefilterState}
               />
-              <ProjectComputeModeSelect
-                onChange={projectListModel.onSelectProject}
-                value={projectListModel.computeMode}
-              />
-              <ProjectStateSelect
-                onChange={projectListModel.changeProjectState}
-                value={projectListModel.selectState}
-              />
             </Space>
           )}
           <Button type="primary" onClick={handleCreateProject}>
@@ -152,143 +170,18 @@ export const P2pProjectListComponent: React.FC = () => {
       {projectList.length === 0 ? (
         <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
       ) : (
-        <div
-          className={classNames(styles.content, {
-            [styles.p2pContent]: isP2PWorkbench(pathname),
-          })}
-        >
-          {(isP2PWorkbench(pathname) ? projectList.slice(0, 6) : projectList).map(
-            (item, index) => {
-              return (
-                <div
-                  className={styles.projectBox}
-                  key={item.projectId}
-                  onMouseEnter={() => {
-                    setHoverCurrent(index);
-                  }}
-                  onMouseLeave={() => {
-                    setHoverCurrent(-1);
-                  }}
-                >
-                  <div>
-                    <div className={styles.listBox}>
-                      {item.status === ProjectStatus.ARCHIVED && (
-                        <div className={styles.archiveTag}>
-                          <span>已归档</span>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Tooltip
-                          title={
-                            item.computeMode === ComputeModeType.TEE
-                              ? item.teeNodeId
-                              : ''
-                          }
-                        >
-                          <Tag className={styles.computeModeTag}>
-                            {computeModeText[
-                              item.computeMode as keyof typeof computeModeText
-                            ] || computeModeText[ComputeModeType.MPC]}
-                          </Tag>
-                        </Tooltip>
-                        <div style={{ marginRight: 8 }}>
-                          <ProjectTypeTag type={item.computeFunc || 'DAG'} />
-                        </div>
-                        <div className={styles.header} style={{ flex: 1 }}>
-                          <Tooltip title={item.projectName}>
-                            <Title
-                              className={styles.ellipsisName}
-                              level={5}
-                              ellipsis={true}
-                            >
-                              {item.projectName}
-                            </Title>
-                          </Tooltip>
-                          {/* 只有项目发起方才可编辑，并且项目不是已归档项目 */}
-                          {item.status !== ProjectStatus.ARCHIVED &&
-                            item.initiator === nodeId && (
-                              <EditOutlined
-                                className={styles.editButton}
-                                onClick={() => {
-                                  setIsModalOpen(true);
-                                  setEditProjectData(item);
-                                }}
-                              />
-                            )}
-                        </div>
-                      </div>
-                      <Paragraph ellipsis={{ rows: 1 }} className={styles.ellipsisDesc}>
-                        {item.description || '暂无描述'}
-                      </Paragraph>
-                      {/* 有受邀方没有通过 */}
-                      {!checkAllApproved(item) && (
-                        <div className={styles.authProjectTagContent}>
-                          <AuthProjectTag
-                            currentNode={{ id: nodeId as string }}
-                            simple={hoverCurrent !== index}
-                            project={item}
-                          />
-                        </div>
-                      )}
-                      {/* 所有的受邀方都通过展示 */}
-                      {checkAllApproved(item) && (
-                        <div className={styles.projects}>
-                          <div className={styles.task}>
-                            <div className={styles.titleName}>参与节点</div>
-
-                            <div className={styles.count}>
-                              <ProjectNodePopover
-                                project={{
-                                  nodes: [
-                                    {
-                                      nodeId: item.initiator,
-                                      nodeName: item.initiatorName,
-                                    },
-                                    ...(item.partyVoteInfos || []),
-                                  ],
-                                }}
-                                isP2P
-                                currentId={nodeId as string}
-                              />
-                            </div>
-                          </div>
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              flex: 1,
-                            }}
-                          >
-                            <div className={styles.titleName}>训练流</div>
-                            <span className={styles.count}>
-                              <ProjectPipeLinePopover project={item} />
-                            </span>
-                          </div>
-                          <div className={styles.task}>
-                            <div className={styles.titleName}>任务数</div>
-                            <div className={styles.count}>
-                              <ProjectTaskPopover project={item} />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.bootom}>
-                      <P2pProjectButtons project={item} />
-                    </div>
-                  </div>
-                </div>
-              );
-            },
-          )}
-          {!isP2PWorkbench(pathname) && (
-            <>
-              <i></i>
-              <i></i>
-              <i></i>
-            </>
-          )}
-        </div>
+          <div className={styles.content}>
+            <Table
+                loading={projectListModel.projectListService.projectListLoading}
+                dataSource={projectList}
+                columns={columns}
+                onChange={(pagination, filters, sorter) =>
+                    projectListModel.typeFilter(filters, sorter as { order: string; field: string })
+                }
+                size="small"
+                rowKey={(record) => record.id as string}
+            />
+          </div>
       )}
       {loadMore}
       <EditProjectModal
@@ -303,6 +196,8 @@ export const P2pProjectListComponent: React.FC = () => {
 
 export class ProjectListModel extends Model {
   readonly projectListService;
+
+  sortRule = {};
 
   constructor() {
     super();
@@ -383,6 +278,20 @@ export class ProjectListModel extends Model {
           return i.computeMode && !(i.computeMode.indexOf(ComputeModeType.TEE) >= 0);
         }
       });
+  };
+
+  typeFilter = (
+      _tableInfo: Record<string, FilterValue | null>,
+      sort: { order: string; field: string },
+  ) => {
+    if (sort?.order) {
+      this.sortRule = {
+        [sort.field]: sort.order === 'ascend' ? 'ASC' : 'DESC',
+      };
+    } else {
+      this.sortRule = {};
+    }
+    this.projectListService.getListProject();
   };
 
   resetFilters = () => {
