@@ -108,45 +108,81 @@ export const PsiLayout = () => {
     }
   };
 
-  const handlePartnerFileChange = async (fileId: string) => {
-    // 获取合作方文件列
-    try {
-      // const response = await axios.get(apiEndpoints.getFileColumns(fileId));
-      // setPartnerFileColumns(response.data.columns);
-      setPartnerFileColumns(mockedPartnerFileColumns);
-    } catch (error) {
-      message.error('获取合作方文件列失败');
-    }
+  const handlePartnerFileChange = (partnerFiles) => {
+    setPartnerFiles(partnerFiles);
   };
 
-  const handleUpload = async (options: any) => {
-    const {file, onSuccess, onError} = options;
+
+  const handlePartnerFileColumns = (partnerFileColumns) => {
+    setPartnerFileColumns(partnerFileColumns);
+  };
+
+  // const handlePartnerFileChange = async (fileId: string) => {
+  //   // 获取合作方文件列
+  //   try {
+  //     // const response = await axios.get(apiEndpoints.getFileColumns(fileId));
+  //     // setPartnerFileColumns(response.data.columns);
+  //     //setPartnerFileColumns(mockedPartnerFileColumns);
+  //   } catch (error) {
+  //     message.error('获取合作方文件列失败');
+  //   }
+  // };
+
+  const handleUpload = async (options) => {
+    const { file, onSuccess, onError } = options;
     if (fileOption === 'select') {
       message.error('请先删除文件选择后再上传文件');
       return;
     }
     const formData = new FormData();
     formData.append('file', file);
-
     try {
-      // const response = await axios.post(apiEndpoints.uploadFile, formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
-      //
-      setFileOption('upload'); // 使文件选择失效
-      setUploadedFile(file);
-      // setLocalFileColumns(response.data.columns);
-      setLocalFileColumns(mockedLocalFileColumns);
-      form.setFieldsValue({ localFileColumnSelect: undefined });
-      onSuccess('文件上传成功');
-      message.success('文件上传成功');
+      // 这里我们使用JavaScript的split方法来解析CSV文件
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const rows = content.split('\n');
+        const columns = rows[0].split(','); // 假设第一行是列标题
+        setLocalFileColumns(columns);
+        form.setFieldsValue({ localFileColumnSelect: undefined });
+        onSuccess('文件上传成功');
+        message.success('文件上传成功');
+      };
+      reader.readAsText(file);
     } catch (error) {
       onError('文件上传失败');
       message.error('文件上传失败');
     }
-  };
+   };
+
+  // const handleUpload = async (options: any) => {
+  //   const {file, onSuccess, onError} = options;
+  //   if (fileOption === 'select') {
+  //     message.error('请先删除文件选择后再上传文件');
+  //     return;
+  //   }
+  //   const formData = new FormData();
+  //   formData.append('file', file);
+
+  //   try {
+  //     // const response = await axios.post(apiEndpoints.uploadFile, formData, {
+  //     //   headers: {
+  //     //     'Content-Type': 'multipart/form-data',
+  //     //   },
+  //     // });
+  //     //
+  //     setFileOption('upload'); // 使文件选择失效
+  //     setUploadedFile(file);
+  //     // setLocalFileColumns(response.data.columns);
+  //     setLocalFileColumns(mockedLocalFileColumns);
+  //     form.setFieldsValue({ localFileColumnSelect: undefined });
+  //     onSuccess('文件上传成功');
+  //     message.success('文件上传成功');
+  //   } catch (error) {
+  //     onError('文件上传失败');
+  //     message.error('文件上传失败');
+  //   }
+  // };
 
   const handleClearSelection = () => {
     setFileOption(null); // 重置option使得能够再次选择文件
@@ -157,6 +193,7 @@ export const PsiLayout = () => {
     form.resetFields(['localFileSelect', 'localFileColumnSelect']);
     message.success('已删除选择或上传的文件');
   };
+
 
   const handleDirectorySelect = (directoryPath) => {
     setOutputDirectory(directoryPath);
@@ -321,35 +358,38 @@ export const PsiLayout = () => {
               )}
               <Form.Item name="localFileColumnSelect" label="求交列选择"
                          rules={[{required: true, message: '请选择列'}]}>
-                <Select placeholder="请选择列">
-                  {localFileColumns.map((column: string) => (
-                    <Option key={column} value={column}>
-                      {column}
-                    </Option>
-                  ))}
-                </Select>
+                 <Select placeholder="请选择列" onChange={setSelectedLocalFileColumn}>
+                {localFileColumns.map((column: string) => (
+                  <Option key={column} value={column}>
+                    {column}
+                  </Option>
+                ))}
+              </Select>
               </Form.Item>
 
               <h3>求交设置</h3>
               <Form.Item name="partnerFileSelect" label="合作方文件选择"
                          rules={[{required: true, message: '请选择合作方文件'}]}>
-                <Select placeholder="请选择合作方文件" onChange={handlePartnerFileChange}>
+                {/* <Select placeholder="请选择合作方文件" onChange={handlePartnerFileChange}>
                   {partnerFiles.map((file: any) => (
                     <Option key={file.id} value={file.id}>
                       {file.name}
                     </Option>
                   ))}
-                </Select>
+                </Select> */}
+                 <Input placeholder="请输入合作方文件" onChange={handlePartnerFileChange} />
               </Form.Item>
               <Form.Item name="partnerFileColumnSelect" label="合作方求交列选择"
                          rules={[{required: true, message: '请选择列'}]}>
-                <Select placeholder="请选择列">
+                {/* <Select placeholder="请选择列">
                   {partnerFileColumns.map((column: string) => (
                     <Option key={column} value={column}>
                       {column}
                     </Option>
                   ))}
-                </Select>
+                </Select> */}
+                 <Input placeholder="请输入合作方求交列" onChange={handlePartnerFileColumns} />
+
               </Form.Item>
 
               <h3>结果导出</h3>
