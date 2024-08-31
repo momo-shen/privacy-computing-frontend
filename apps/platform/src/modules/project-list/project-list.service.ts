@@ -6,7 +6,7 @@ export class ProjectListService extends Model {
   projectList = [];
   projectListLoading = false;
 
-  getListProject = async () => {
+  getProjectList = async () => {
   };
 
   getPipelines = async (projectId: string) => {

@@ -1,25 +1,17 @@
 import {
-  GlobalOutlined,
-  ReadOutlined,
-  BellOutlined,
   CaretDownOutlined,
   LogoutOutlined,
   DatabaseOutlined,
 } from '@ant-design/icons';
 import { Avatar, Badge, Button, Dropdown, Empty, Popover, Space, Spin } from 'antd';
-import classNames from 'classnames';
 import { parse } from 'query-string';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { history, useLocation } from 'umi';
 
-import centerOfflineImgLink from '@/assets/center-offline.png';
-import centerImgLink from '@/assets/center.png';
 import edgeOfflineImgLink from '@/assets/edge-offline.png';
 import edgeImgLink from '@/assets/edge.png';
 import Logo from '@/assets/logo.svg';
 import fallbackLink from '@/assets/offline-user.png';
-import { EdgeAuthWrapper } from '@/components/edge-wrapper-auth';
-import { hasAccess, Platform } from '@/components/platform-wrapper';
 import { LoginService } from '@/modules/login/login.service';
 import platformConfig from '@/platform.config';
 import { getImgLink } from '@/util/tracert-helper';
@@ -28,36 +20,12 @@ import { getModel, Model, useModel } from '@/util/valtio-helper';
 import { HomeLayoutService } from './home-layout.service';
 import styles from './index.less';
 
-type IAvatarMapping = Record<
-  Platform,
-  {
-    onlineLink: string;
-    localLink: string;
-    offlineLink: string;
-    localStorageKey: string;
-  }
->;
-
-const avatarMapping: IAvatarMapping = {
-  [Platform.CENTER]: {
-    onlineLink: 'https://secretflow-public.oss-cn-hangzhou.aliyuncs.com/center.png',
-    localLink: centerImgLink,
-    offlineLink: centerOfflineImgLink,
-    localStorageKey: 'secretpad-center',
-  },
-  [Platform.EDGE]: {
-    onlineLink: 'https://secretflow-public.oss-cn-hangzhou.aliyuncs.com/edge.png',
-    localLink: edgeImgLink,
-    offlineLink: edgeOfflineImgLink,
-    localStorageKey: 'secretpad-edge',
-  },
-  [Platform.AUTONOMY]: {
-    onlineLink: 'https://secretflow-public.oss-cn-hangzhou.aliyuncs.com/autonomy.png',
-    // autonomy 和 edge 头像相同
-    localLink: edgeImgLink,
-    offlineLink: edgeOfflineImgLink,
-    localStorageKey: 'secretpad-autonomy',
-  },
+const avatar = {
+  onlineLink: 'https://secretflow-public.oss-cn-hangzhou.aliyuncs.com/autonomy.png',
+  // autonomy 和 edge 头像相同
+  localLink: edgeImgLink,
+  offlineLink: edgeOfflineImgLink,
+  localStorageKey: 'secretpad-autonomy',
 };
 
 export const HeaderComponent = () => {
@@ -70,6 +38,8 @@ export const HeaderComponent = () => {
 
   const [avatarLink, setAvatarLink] = useState('');
   const [avatarOfflineLink, setAvatarOfflineLink] = useState('');
+
+  const ownerId = localStorage.getItem('ownerId');
 
   const onLogout = () => {
     history.push('/login');
@@ -85,18 +55,11 @@ export const HeaderComponent = () => {
 
   useEffect(() => {
     if (!loginService?.userInfo) return;
+    const avatarInfo = avatar;
+    setAvatarOfflineLink(avatarInfo.offlineLink);
 
-    // 获取平台类型
-    const platformType = loginService.userInfo.platformType;
-
-    if (platformType) {
-      // 如果是 CENTER / EDGE
-      const avatarInfo = avatarMapping[platformType];
-      setAvatarOfflineLink(avatarInfo.offlineLink);
-
-      const imgLink = getImgLink(avatarInfo);
-      setAvatarLink(imgLink);
-    }
+    const imgLink = getImgLink(avatarInfo);
+    setAvatarLink(imgLink);
   }, [loginService?.userInfo]);
 
   return (
@@ -104,13 +67,9 @@ export const HeaderComponent = () => {
       <div className={styles.left}>
         {
           <div
-            className={classNames({
-              [styles.logo]: hasAccess({ type: [Platform.AUTONOMY] }),
-            })}
+            className={styles.logo}
             onClick={() => {
-              if (hasAccess({ type: [Platform.AUTONOMY] })) {
-                history.push(`/edge?nodeId=${nodeId}&tab=workbench`);
-              }
+              history.push(`/edge?nodeId=${nodeId}&tab=workbench`);
             }}
           >
             {platformConfig.header.logo ? platformConfig.header.logo : <Logo />}
@@ -130,7 +89,7 @@ export const HeaderComponent = () => {
               }
             >
               <DatabaseOutlined />
-              <span className={styles.nodeName}>{viewInstance.nodeName}</span>
+              <span className={styles.nodeName}>{ownerId}</span>
               节点
             </div>
           </>
@@ -153,7 +112,7 @@ export const HeaderComponent = () => {
                 icon={<img width={'100%'} src={avatarOfflineLink || fallbackLink} />}
                 src={avatarLink || null}
               />
-              {loginService?.userInfo?.name}
+              {ownerId}
               <CaretDownOutlined />
             </Space>
           </div>

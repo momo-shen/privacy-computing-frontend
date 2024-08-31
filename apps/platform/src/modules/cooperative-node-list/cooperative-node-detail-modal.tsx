@@ -3,7 +3,6 @@ import { Badge, Button, Descriptions, Drawer, Space, Spin, Tooltip } from 'antd'
 import { useState } from 'react';
 import React from 'react';
 
-import { Platform, hasAccess } from '@/components/platform-wrapper';
 import { PopoverCopy } from '@/components/popover-copy';
 import { EllipsisText } from '@/components/text-ellipsis.tsx';
 import { EllipsisMiddle } from '@/components/text-ellipsis.tsx';
@@ -106,13 +105,11 @@ export const CooperativeNodeDetailDrawer = ({
         <div className={styles.baseTitle}>合作节点基本信息</div>
         <div className={styles.baseContent}>
           <Descriptions column={1} className={styles.descriptionClass}>
-            {hasAccess({ type: [Platform.AUTONOMY] }) && (
-              <Descriptions.Item label="管控节点ID">
-                <EllipsisText>
-                  {cooperativeNodeDetail?.srcNode?.masterNodeId}
-                </EllipsisText>
-              </Descriptions.Item>
-            )}
+            <Descriptions.Item label="管控节点ID">
+              <EllipsisText>
+                {cooperativeNodeDetail?.srcNode?.masterNodeId}
+              </EllipsisText>
+            </Descriptions.Item>
             <Descriptions.Item label="计算节点名">
               <EllipsisText>{cooperativeNodeDetail?.srcNode?.nodeName}</EllipsisText>
             </Descriptions.Item>
@@ -122,24 +119,20 @@ export const CooperativeNodeDetailDrawer = ({
             <Descriptions.Item label="节点通讯地址">
               <EllipsisText>{cooperativeNodeDetail?.srcNode?.netAddress}</EllipsisText>
             </Descriptions.Item>
-            {hasAccess({ type: [Platform.AUTONOMY] }) && (
-              <>
-                <Descriptions.Item label="公钥">
-                  <PopoverCopy
-                    title="节点公钥"
-                    icon="复制公钥"
-                    copyText={cooperativeNodeDetail?.srcNode?.certText}
-                  />
-                </Descriptions.Item>
-                <Descriptions.Item label="节点认证码">
-                  <PopoverCopy
-                    title="节点认证码"
-                    icon="复制认证码"
-                    copyText={cooperativeNodeDetail?.srcNode?.nodeAuthenticationCode}
-                  />
-                </Descriptions.Item>
-              </>
-            )}
+            <Descriptions.Item label="公钥">
+              <PopoverCopy
+                  title="节点公钥"
+                  icon="复制公钥"
+                  copyText={cooperativeNodeDetail?.srcNode?.certText}
+              />
+            </Descriptions.Item>
+            <Descriptions.Item label="节点认证码">
+              <PopoverCopy
+                  title="节点认证码"
+                  icon="复制认证码"
+                  copyText={cooperativeNodeDetail?.srcNode?.nodeAuthenticationCode}
+              />
+            </Descriptions.Item>
           </Descriptions>
         </div>
         <Descriptions column={1} className={styles.descriptionClass}>

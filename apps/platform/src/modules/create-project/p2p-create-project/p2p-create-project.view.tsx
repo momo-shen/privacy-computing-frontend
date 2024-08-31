@@ -1,15 +1,11 @@
-import { QuestionCircleOutlined } from '@ant-design/icons';
 import { Input, Form, Drawer, Button, Space, Radio, Tooltip, Alert } from 'antd';
 import classnames from 'classnames';
 import { parse } from 'query-string';
 import React from 'react';
 import { history } from 'umi';
-import { AccessWrapper, PadMode, hasAccess } from '@/components/platform-wrapper';
 import { SwitchCard } from '@/components/switch-card';
 import { HeaderModel } from '@/modules/layout/home-layout/header-view';
 import { useModel } from '@/util/valtio-helper';
-
-import { AddNodeTag } from '../add-node-tag';
 
 import { computeFuncList } from './compute-func-data';
 import styles from './index.less';
