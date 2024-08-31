@@ -3,8 +3,6 @@ import React from 'react';
 import { history } from 'umi';
 
 import { ReactComponent as Logo } from '@/assets/logo.svg';
-import {type PadMode, Platform} from '@/components/platform-wrapper';
-import platformConfig from '@/platform.config';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
 import { LoginForm } from './component/login-form';
@@ -33,56 +31,20 @@ export class LoginModel extends Model {
 
   loginConfirm = async (loginFields: UserInfo) => {
 
-    const status = {
-      code: 0,
-      msg: ""
-    };
-    const data = {
-      token: "token",
-      platformType: 'AUTONOMY', // 'EDGE' | 'CENTER' | 'AUTONOMY';
-      name: "name",
-      ownerType: 'CENTER', // 宿主类型
-      ownerId: "ownerId",// 	NODE的话这里存nodeId
-      deployMode: "ALL-IN-ONE"// 'ALL-IN-ONE' | 'MPC' | 'TEE';
-    };
+    const { status, data } = await this.loginService.login({
+      name: loginFields.name,
+      password: loginFields.password,
+    });
 
-    const notFirstTimeIn = localStorage.getItem('notFirstTimeIn');
     this.token = data?.token || '';
     this.loginService.userInfo = data as User;
     if (status?.code === 0) {
       localStorage.setItem('User-Token', this.token);
-      // P2P 模式跳转
-      if (this.loginService.userInfo.platformType === Platform.AUTONOMY) {
-        if (this.loginService.userInfo.ownerId) {
-          localStorage.setItem('neverLogined', 'true');
-          history.push(`/edge?nodeId=${this.loginService.userInfo.ownerId}`);
-          message.success('登录成功');
-          return;
-        }
-      }
-
-      // CENTER 和 EDGE 模式跳转
-      if (this.loginService.userInfo.platformType === 'EDGE') {
-        if (this.loginService.userInfo.ownerId) {
-          localStorage.setItem('neverLogined', 'true');
-          history.push(`/node?nodeId=${this.loginService.userInfo.ownerId}`);
-        }
-      } else {
+      if (this.loginService.userInfo.ownerId) {
         localStorage.setItem('neverLogined', 'true');
-        if (notFirstTimeIn || !platformConfig.guide) {
-          history.push('/');
-        } else {
-          // edge 账号登陆center平台不需要跳转到guide页面
-          if (
-            this.loginService.userInfo.platformType === 'CENTER' &&
-            this.loginService.userInfo?.ownerType === 'EDGE'
-          ) {
-            history.push('/');
-          } else {
-            history.push('/guide');
-          }
-          localStorage.setItem('notFirstTimeIn', 'true');
-        }
+        history.push(`/edge?nodeId=${this.loginService.userInfo.ownerId}`);
+        message.success('登录成功');
+        return;
       }
       message.success('登录成功');
     } else {

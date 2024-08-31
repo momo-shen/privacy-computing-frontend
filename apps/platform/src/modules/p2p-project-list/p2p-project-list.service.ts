@@ -3,16 +3,10 @@ import { parse } from 'query-string';
 import API from '@/services';
 import { Model } from '@/util/valtio-helper';
 
-import type { StatusEnum } from './components/auth-project-tag';
-
 export class P2pProjectListService extends Model {
-  projectList = [];
-  displayProjectList = [];
+  projectList: API.PsiReqeust[] = [];
+  displayProjectList: API.PsiReqeust[] = [];
   projectListLoading = false;
-
-  messageGetList: null | (() => Promise<void>) = null;
-
-  comment = '';
 
   nodeId: string | undefined = undefined;
 
@@ -23,32 +17,24 @@ export class P2pProjectListService extends Model {
     }
   }
 
-  setComment = (value: string) => {
-    this.comment = value;
-  };
-
-  getListProject = async () => {
+  getProjectList = async () => {
     this.projectListLoading = true;
-    const response = await API.PsiController.getListProject();
+    const ownerId: string = localStorage.getItem('ownerId') || '';
+    const response = await API.PsiController.getProjectList(ownerId);
     const data = response.requests;
     this.projectList = data || [];
     this.projectListLoading = false;
     this.displayProjectList = this.projectList.reverse();
     return this.projectList.reverse();
   };
-  /**
-   * 编辑项目
-   */
-  projectEdit = async (item: API.ProjectVO, projectId: string) => {
 
-  };
+  createProject = async (psiReqeust: API.PsiReqeust) => {
+    await API.PsiController.createProject(psiReqeust);
+    await this.getProjectList();
+  }
 
-  /**
-   * 处理审批
-   * @param action c
-   * @param id
-   */
-  process = async (action: StatusEnum, id: string, pathname: string) => {
-
+  handleProject = async (id: number, action: string) => {
+    await API.PsiController.handleProject(id, action);
+    await this.getProjectList();
   };
 }

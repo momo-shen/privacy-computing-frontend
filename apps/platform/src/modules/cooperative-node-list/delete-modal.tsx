@@ -2,7 +2,6 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 import { message, Modal, Space } from 'antd';
 import { useMemo } from 'react';
 
-import { hasAccess, Platform } from '@/components/platform-wrapper';
 import { useModel } from '@/util/valtio-helper';
 
 import { CooperativeNodeService } from './cooperative-node.service';

@@ -1,33 +1,41 @@
 import {SearchOutlined} from '@ant-design/icons';
 import {Empty, Table, Tag} from 'antd';
-import { Button, Typography, Tooltip, Input, Space } from 'antd';
-import { Spin } from 'antd';
+import {Button, Typography, Tooltip, Input, Space} from 'antd';
+import {Spin} from 'antd';
 import classNames from 'classnames';
-import { parse } from 'query-string';
-import type { ChangeEvent } from 'react';
-import { useEffect, useState } from 'react';
+import {parse} from 'query-string';
+import type {ChangeEvent} from 'react';
+import {useEffect, useState} from 'react';
 import React from 'react';
-import { history, useLocation } from 'umi';
-
-import { EdgeRouteWrapper, isP2PWorkbench } from '@/components/platform-wrapper';
-import { P2PCreateProjectModal } from '@/modules/create-project/p2p-create-project/p2p-create-project.view';
-import { EditProjectModal } from '@/modules/project-list/components/edit-project';
-import { getModel, Model, useModel } from '@/util/valtio-helper';
+import {history, useLocation} from 'umi';
 
 import {
-  SelectProjectState,
-} from '../p2p-project-list/components/common';
+  P2PCreateProjectModal
+} from '@/modules/create-project/p2p-create-project/p2p-create-project.view';
+import {EditProjectModal} from '@/modules/project-list/components/edit-project';
+import {getModel, Model, useModel} from '@/util/valtio-helper';
+
 import {
-  ComputeModeType,
   RadioGroup,
   RadioGroupState,
 } from '../p2p-project-list/components/common';
 
 import styles from './index.less';
-import { P2pProjectListService } from './p2p-project-list.service';
+import {P2pProjectListService} from './p2p-project-list.service';
 import type {FilterValue} from "antd/es/table/interface";
 
+export const EdgeRouteWrapper = (props: { children?: React.ReactNode }) => {
+  const {children} = props;
+
+  const {pathname} = useLocation();
+  if (children === undefined || children === null) return null;
+  if (pathname !== '/edge') return null;
+  return <>{pathname === '/edge' && <>{children}</>}</>;
+};
+
 export const P2pProjectListComponent: React.FC = () => {
+  const ownerId = localStorage.getItem('ownerId');
+
   const projectListModel = useModel(ProjectListModel);
   const p2pProjectService = useModel(P2pProjectListService);
 
@@ -54,7 +62,12 @@ export const P2pProjectListComponent: React.FC = () => {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: '15%'
+      width: '15%',
+      render: (status: string) => {
+        return (
+            <strong>{status}</strong>
+        );
+      }
     },
     {
       title: '创建时间',
@@ -64,44 +77,47 @@ export const P2pProjectListComponent: React.FC = () => {
     },
     {
       title: '操作',
-      key: 'action',
-      width: '15%'
-    },
+      dataIndex: ['receiverId', 'status'],
+      width: '15%',
+      render: (text: string, record: any) => {
+        return record.receiverId === ownerId && record.status === 'pending' &&
+            (<><Button onClick={() =>
+                p2pProjectService.handleProject(record.id, 'accept')}>接受</Button>
+              <Button onClick={() =>
+                  p2pProjectService.handleProject(record.id, 'reject')}>拒绝</Button></>)
+      }
+    }
   ];
 
-  const { pathname } = useLocation();
+  const {pathname} = useLocation();
 
-  const { handleCreateProject } = projectListModel;
+  const {handleCreateProject} = projectListModel;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { displayProjectList: projectList } = p2pProjectService;
+  const {displayProjectList: projectList} = p2pProjectService;
 
-  const { Title, Paragraph } = Typography;
-
-  const { nodeId } = parse(window.location.search);
+  const {nodeId} = parse(window.location.search);
 
   useEffect(() => {
-    p2pProjectService.getListProject();
+    p2pProjectService.getProjectList();
   }, []);
 
   const [editProjectData, setEditProjectData] = useState({});
 
-  const [hoverCurrent, setHoverCurrent] = useState(-1);
+  const {Link} = Typography;
 
-  const { Link } = Typography;
-
-  const loadMore = isP2PWorkbench(pathname) && projectList.length > 6 && (
-    <div className={styles.showAll}>
-      <Link
-        style={{ color: 'rgba(0,0,0,0.45)' }}
-        onClick={() => {
-          history.push(`/edge?nodeId=${nodeId}&tab=my-project`);
-        }}
-      >
-        查看全部
-      </Link>
-    </div>
+  const loadMore = projectList.length > 6 && (
+      <div className={styles.showAll}>
+        <Link
+            style={{color: 'rgba(0,0,0,0.45)'}}
+            onClick={() => {
+              history.push(`/edge?nodeId=${nodeId}&tab=my-project`);
+            }}
+        >
+          查看全部
+        </Link>
+      </div>
   );
 
   const [searchInput, setSearchInput] = useState('');
@@ -118,79 +134,88 @@ export const P2pProjectListComponent: React.FC = () => {
     projectListModel.selectState,
   ]);
 
+  const isP2PWorkbench = (pathname: string) => {
+    const {search} = window.location;
+    const {tab} = parse(search);
+    return pathname === '/edge' && tab === 'workbench';
+  };
+
   return (
-    <div
-      className={classNames(styles.projectList, {
-        [styles.p2pProjectList]: isP2PWorkbench(pathname),
-      })}
-    >
-      <EdgeRouteWrapper>
-        <div className={styles.projectListHeader}>
-          {isP2PWorkbench(pathname) ? (
-            <div className={styles.headerTitle}>我的项目</div>
-          ) : (
-            <Space size="middle" wrap>
-              <Input
-                placeholder="搜索项目"
-                onChange={(e) => searchProject(e)}
-                style={{ width: 200 }}
-                value={searchInput}
-                suffix={
-                  <SearchOutlined
-                    style={{
-                      color: '#aaa',
-                    }}
-                  />
-                }
-              />
-              <RadioGroup
-                value={projectListModel.radioFilterState}
-                onChange={projectListModel.changefilterState}
-              />
-            </Space>
-          )}
-          <Button type="primary" onClick={handleCreateProject}>
-            新建项目
-          </Button>
-          <P2PCreateProjectModal
-            visible={projectListModel.showCreateProjectModel}
-            close={() => {
-              projectListModel.showCreateProjectModel = false;
-            }}
-            onOk={() => p2pProjectService.getListProject()}
-          />
-        </div>
-      </EdgeRouteWrapper>
-      <Spin
-        spinning={projectListModel.projectListService.projectListLoading}
-        className={styles.spin}
+      <div
+          className={classNames(styles.projectList, {
+            [styles.p2pProjectList]: isP2PWorkbench(pathname),
+          })}
       >
-        <div></div>
-      </Spin>
-      {projectList.length === 0 ? (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-      ) : (
-          <div className={styles.content}>
-            <Table
-                loading={projectListModel.projectListService.projectListLoading}
-                dataSource={projectList}
-                columns={columns}
-                onChange={(pagination, filters, sorter) =>
-                    projectListModel.typeFilter(filters, sorter as { order: string; field: string })
-                }
-                size="small"
-                rowKey={(record) => record.id as string}
+        <EdgeRouteWrapper>
+          <div className={styles.projectListHeader}>
+            {isP2PWorkbench(pathname) ? (
+                <div className={styles.headerTitle}>我的项目</div>
+            ) : (
+                <Space size="middle" wrap>
+                  <Input
+                      placeholder="搜索项目"
+                      onChange={(e) => searchProject(e)}
+                      style={{width: 200}}
+                      value={searchInput}
+                      suffix={
+                        <SearchOutlined
+                            style={{
+                              color: '#aaa',
+                            }}
+                        />
+                      }
+                  />
+                  <RadioGroup
+                      value={projectListModel.radioFilterState}
+                      onChange={projectListModel.changefilterState}
+                  />
+                </Space>
+            )}
+            <Button type="primary" onClick={handleCreateProject}>
+              新建项目
+            </Button>
+            <P2PCreateProjectModal
+                visible={projectListModel.showCreateProjectModel}
+                close={() => {
+                  projectListModel.showCreateProjectModel = false;
+                }}
+                onOk={() => p2pProjectService.getProjectList()}
             />
           </div>
-      )}
-      {loadMore}
-      <EditProjectModal
-        isModalOpen={isModalOpen}
-        handleCancel={() => setIsModalOpen(false)}
-        data={editProjectData}
-        onEdit={p2pProjectService.projectEdit}
-      />
-    </div>
+        </EdgeRouteWrapper>
+        <Spin
+            spinning={projectListModel.projectListService.projectListLoading}
+            className={styles.spin}
+        >
+          <div></div>
+        </Spin>
+        {projectList.length === 0 ? (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+        ) : (
+            <div className={styles.content}>
+              <Table
+                  loading={projectListModel.projectListService.projectListLoading}
+                  dataSource={projectList}
+                  columns={columns}
+                  onChange={(pagination, filters, sorter) =>
+                      projectListModel.typeFilter(filters, sorter as {
+                        order: string;
+                        field: string
+                      })
+                  }
+                  size="small"
+                  rowKey={(record) => record.id as string}
+              />
+            </div>
+        )}
+        {loadMore}
+        <EditProjectModal
+            isModalOpen={isModalOpen}
+            handleCancel={() => setIsModalOpen(false)}
+            data={editProjectData}
+            onEdit={p2pProjectService.projectEdit}
+        />
+      </div>
   );
 };
 
@@ -207,77 +232,38 @@ export class ProjectListModel extends Model {
   nodeId: string | undefined = undefined;
 
   onViewMount() {
-    const { nodeId } = parse(window.location.search);
+    const {nodeId} = parse(window.location.search);
     if (nodeId) {
       this.nodeId = nodeId as string;
     }
     this.resetFilters();
   }
 
-  pipelines: API.GraphMetaVO[] = [];
-
   showCreateProjectModel = false;
 
   radioFilterState = RadioGroupState.ALL;
-  selectState = SelectProjectState.ALL;
-  computeMode = ComputeModeType.ALL;
 
   changefilterState = (value: RadioGroupState) => {
     this.resetFilters();
     this.radioFilterState = value;
     this.projectListService.displayProjectList =
-      this.projectListService.projectList.filter((i) => {
-        if (value === RadioGroupState.ALL) {
-          return i;
-        } else if (value === RadioGroupState.APPLY) {
-          return i.initiator && i.initiator === this.nodeId;
-        } else if (value === RadioGroupState.PROCESS) {
-          return (
-            i.partyVoteInfos &&
-            (i.partyVoteInfos || []).some((item) => item.nodeId === this.nodeId)
-          );
-        }
-      });
-  };
-
-  changeProjectState = (value: SelectProjectState) => {
-    this.resetFilters();
-    this.selectState = value;
-    this.projectListService.displayProjectList =
-      this.projectListService.projectList.filter((i) => {
-        if (!i.status) return;
-        if (value === SelectProjectState.ALL) {
-          return i;
-        } else if (value === SelectProjectState.ARCHIVED) {
-          return i.status && i.status === SelectProjectState.ARCHIVED;
-        } else if (value === SelectProjectState.REVIEWING) {
-          return i.status && i.status === SelectProjectState.REVIEWING;
-        }
-      });
+        this.projectListService.projectList.filter((i) => {
+          if (value === RadioGroupState.ALL) {
+            return i;
+          } else if (value === RadioGroupState.APPLY) {
+            return i.senderId === this.nodeId;
+          } else if (value === RadioGroupState.PROCESS) {
+            return i.receiverId === this.nodeId;
+          }
+        });
   };
 
   searchProject = (value: string) => {
     this.projectListService.displayProjectList =
-      this.projectListService.projectList.filter((i) => {
-        if (!i.projectName) return;
-        return i.projectName?.indexOf(value) >= 0;
-      });
-  };
-
-  onSelectProject = (e: string) => {
-    this.resetFilters();
-    this.computeMode = e as ComputeModeType;
-    this.projectListService.displayProjectList =
-      this.projectListService.projectList.filter((i) => {
-        if (e === ComputeModeType.ALL) {
-          return i;
-        } else if (e === ComputeModeType.TEE) {
-          return i.computeMode && i.computeMode.indexOf(ComputeModeType.TEE) >= 0;
-        } else if (e === ComputeModeType.MPC) {
-          // 兼容除tee外的
-          return i.computeMode && !(i.computeMode.indexOf(ComputeModeType.TEE) >= 0);
-        }
-      });
+        this.projectListService.projectList.filter((i) => {
+          if (!i.projectName) return;
+          return i.projectName?.indexOf(value) >= 0;
+        });
   };
 
   typeFilter = (
@@ -291,13 +277,11 @@ export class ProjectListModel extends Model {
     } else {
       this.sortRule = {};
     }
-    this.projectListService.getListProject();
+    this.projectListService.getProjectList();
   };
 
   resetFilters = () => {
-    this.computeMode = ComputeModeType.ALL;
     this.radioFilterState = RadioGroupState.ALL;
-    this.selectState = SelectProjectState.ALL;
   };
 
   handleCreateProject = () => {

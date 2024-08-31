@@ -9,7 +9,6 @@ import type { FilterValue } from 'antd/es/table/interface';
 import { parse } from 'query-string';
 import type { ChangeEvent } from 'react';
 
-import { AccessWrapper, Platform } from '@/components/platform-wrapper';
 import { getModel, Model, useModel } from '@/util/valtio-helper';
 
 import { AddCooperativeNodeDrawer } from './add-cooperative-node-modal';
