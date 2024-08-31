@@ -73,7 +73,10 @@ export const P2pProjectListComponent: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       width: '15%',
-      sorter: true
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => {
+        return new Date(a.createTime) > new Date(b.createTime) ? 1 : -1;
+      },
     },
     {
       title: '操作',
