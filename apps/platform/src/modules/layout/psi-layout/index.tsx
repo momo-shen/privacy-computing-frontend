@@ -238,32 +238,64 @@ export const PsiLayout = () => {
       ws_bob.close();
     };
   }, []);
-
   const handleAliceSubmit = async () => {
     setLoading(true);
+    // 使用form.validateFields获取表单数据，并创建PsiRequest对象
     let jsonData = await form.validateFields();
-    jsonData['rule'] = '0';
-    jsonData['curve'] = 'SECP256k1';
-    jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_a.csv';
-    console.log(jsonData);
+    let psiRequest: PsiRequest = {
+      id: jsonData.id,
+      projectName: jsonData.projectName,
+      senderId: jsonData.senderId,
+      senderIp: jsonData.senderIp,
+      senderPort: jsonData.senderPort,
+      senderFilePath: jsonData.senderFilePath,
+      senderInter: jsonData.senderInter,
+      senderOutputPath: jsonData.senderOutputPath,
+      receiverId: jsonData.receiverId,
+      receiverIp: jsonData.receiverIp,
+      receiverPort: jsonData.receiverPort,
+      receiverFilePath: jsonData.receiverFilePath,
+      receiverInter: jsonData.receiverInter,
+      receiverOutputPath: jsonData.receiverOutputPath,
+      protocol: jsonData.protocol,
+      status: jsonData.status,
+      createTime: new Date(), // 假设createTime应该是一个Date对象
+    };
+   
+    console.log(psiRequest);
+   
+    // 确保socketAlice存在且WebSocket连接是打开的
     if (socketAlice && socketAlice.readyState === WebSocket.OPEN) {
-      socketAlice.send(JSON.stringify(jsonData));
+      // 发送符合PsiRequest接口的对象
+      socketAlice.send(JSON.stringify(psiRequest));
     }
     setLoading(false);
-  };
+   };
+  // const handleAliceSubmit = async () => {
+  //   setLoading(true);
+  //   let jsonData = await form.validateFields();
+  //   jsonData['rule'] = '0';
+  //   jsonData['curve'] = 'SECP256k1';
+  //   jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_a.csv';
+  //   console.log(jsonData);
+  //   if (socketAlice && socketAlice.readyState === WebSocket.OPEN) {
+  //     socketAlice.send(JSON.stringify(jsonData));
+  //   }
+  //   setLoading(false);
+  // };
 
-  const handleBobSubmit = async () => {
-      setLoading(true);
-      let jsonData = await form.validateFields();
-      jsonData['rule'] = '1';
-      jsonData['curve'] = 'SECP256k1';
-      jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_b.csv';
-      console.log(jsonData);
-      if (socketBob && socketBob.readyState === WebSocket.OPEN) {
-        socketBob.send(JSON.stringify(jsonData));
-      }
-      setLoading(false);
-  };
+  // const handleBobSubmit = async () => {
+  //     setLoading(true);
+  //     let jsonData = await form.validateFields();
+  //     jsonData['rule'] = '1';
+  //     jsonData['curve'] = 'SECP256k1';
+  //     jsonData['localFileSelect'] = 'D:/post_graduate/phase0/project/test1/set_b.csv';
+  //     console.log(jsonData);
+  //     if (socketBob && socketBob.readyState === WebSocket.OPEN) {
+  //       socketBob.send(JSON.stringify(jsonData));
+  //     }
+  //     setLoading(false);
+  // };
 
   return (
     <Spin spinning={loading}>
@@ -404,14 +436,10 @@ export const PsiLayout = () => {
 
             {activeTab === '2' && (
               <Button type="primary" onClick={handleAliceSubmit} style={{marginBottom: 10}}>
-                给Alice发送请求
+                发送请求
               </Button>
             )}
-            {activeTab === '2' && (
-              <Button type="primary" onClick={handleBobSubmit} style={{marginBottom: 10}}>
-                给Bob发送请求
-              </Button>
-            )}
+            
           </TabPane>
         </Tabs>
         {activeTab === '2' && (<div>Result: {result}</div>)}
