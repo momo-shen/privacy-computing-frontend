@@ -36,8 +36,8 @@ export class P2pProjectListService extends Model {
     await this.getProjectList();
   }
 
-  handleProject = async (id: number, action: string) => {
-    await API.PsiController.handleProject(id, action);
+  handleProject = async (id: string, action: string, receiverOutputPath: string) => {
+    await API.PsiController.handleProject(id, action, receiverOutputPath);
     await this.getProjectList();
   };
 

@@ -21,18 +21,12 @@ interface ICreateProjectModal {
 export const P2PCreateProjectModal = ({
   visible,
   close,
-  onOk,
 }: ICreateProjectModal) => {
   const projectService = useModel(P2pProjectListService);
 
   const [form] = Form.useForm();
 
-  const headerModel = useModel(HeaderModel);
-
   const projectName = Form.useWatch('projectName', form);
-  const nodes = Form.useWatch('nodes', form);
-
-  const { nodeId } = parse(window.location.search);
 
   const handleClose = () => {
     close();
@@ -40,11 +34,8 @@ export const P2PCreateProjectModal = ({
 
   const handleOk = () => {
     form.validateFields().then(async (value) => {
-      // await viewInstance.createProject(value);
-      // handleClose();
-      // onOk && onOk();
       if (value.computeFunc === ProjectType.PSI) {
-        history.push('/psi')
+        history.push('/psi', {projectName: value.projectName});
       } else if (value.computeFunc === ProjectType.PSQL) {
         console.log("hhh")
         projectService.createPsProject({
@@ -69,8 +60,7 @@ export const P2PCreateProjectModal = ({
             type="primary"
             onClick={handleOk}
             className={classnames({
-              [styles.buttonDisable]: !projectName ,
-              // [styles.buttonDisable]: !projectName || !nodes || nodes.length < 1,  修改创建按钮状态
+              [styles.buttonDisable]: !projectName
             })}
           >
             创建

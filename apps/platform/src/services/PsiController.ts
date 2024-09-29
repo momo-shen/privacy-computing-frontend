@@ -17,12 +17,18 @@ export async function createProject(psiReqeust: API.PsiReqeust) {
     });
 }
 
-export async function handleProject(id: number, action: string) {
+export async function handleProject(id: string, action: string, receiverOutputPath: string) {
     return request(`/pc/api/psi/request/${id}/action`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        data: JSON.stringify({ action: action }),
+        data: JSON.stringify({ action: action, receiverOutputPath: receiverOutputPath }),
+    });
+}
+
+export async function getIp() {
+    return request('/pc/api/psi/ip', {
+        method: 'GET',
     });
 }

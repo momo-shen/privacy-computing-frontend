@@ -30,7 +30,6 @@ export class LoginModel extends Model {
   loginService = getModel(LoginService);
 
   loginConfirm = async (loginFields: UserInfo) => {
-
     const { status, data } = await this.loginService.login({
       name: loginFields.name,
       password: loginFields.password,

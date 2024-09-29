@@ -1,6 +1,6 @@
 declare namespace API {
   interface PsiReqeust {
-    id?: number;
+    id?: string;
     projectName?: string;
     senderId?: string;
     senderIp?: string;

@@ -1,5 +1,5 @@
 import {SearchOutlined} from '@ant-design/icons';
-import {Card, Empty, Table, Tag} from 'antd';
+import {Card, Empty, Modal, Table, Tag} from 'antd';
 import {Button, Typography, Tooltip, Input, Space} from 'antd';
 import {Spin} from 'antd';
 import classNames from 'classnames';
@@ -38,6 +38,24 @@ export const P2pProjectListComponent: React.FC = () => {
 
   const projectListModel = useModel(ProjectListModel);
   const p2pProjectService = useModel(P2pProjectListService);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [recordId, setRecordId] = useState('');
+  const [receiverOutputPath, setReceiverOutputPath] = useState('');
+
+  const handleOk = async() => {
+    await p2pProjectService.handleProject(recordId, 'accepted', receiverOutputPath);
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const acceptProject = (recordId: string) => {
+    setIsModalOpen(true);
+    setRecordId(recordId);
+  }
 
   const columns: ColumnsType<API.PsiReqeust> = [
     {
@@ -80,10 +98,9 @@ export const P2pProjectListComponent: React.FC = () => {
       width: '15%',
       render: (text: string, record: any) => {
         return record.receiverId === ownerId && record.status === 'pending' &&
-            (<><Button onClick={() =>
-                p2pProjectService.handleProject(record.id, 'accepted')}>接受</Button>
+            (<><Button onClick={() => acceptProject(record.id)}>接受</Button>
               <Button onClick={() =>
-                  p2pProjectService.handleProject(record.id, 'rejected')}>拒绝</Button></>)
+                  p2pProjectService.handleProject(record.id, 'rejected', '')}>拒绝</Button></>)
       }
     }
   ];
@@ -154,93 +171,102 @@ export const P2pProjectListComponent: React.FC = () => {
   }
 
   return (
-      <div
-          className={classNames(styles.projectList, {
-            [styles.p2pProjectList]: isP2PWorkbench(pathname),
-          })}
-      >
-        <EdgeRouteWrapper>
-          <div className={styles.projectListHeader}>
-            {isP2PWorkbench(pathname) ? (
-                <div className={styles.headerTitle}>我的项目</div>
-            ) : (
-                <Space size="middle" wrap>
-                  <Input
-                      placeholder="搜索项目"
-                      onChange={(e) => searchProject(e)}
-                      style={{width: 200}}
-                      value={searchInput}
-                      suffix={
-                        <SearchOutlined
-                            style={{
-                              color: '#aaa',
-                            }}
-                        />
-                      }
-                  />
-                  <RadioGroup
-                      value={projectListModel.radioFilterState}
-                      onChange={projectListModel.changefilterState}
-                  />
-                </Space>
-            )}
-            <Button type="primary" onClick={handleCreateProject}>
-              新建项目
-            </Button>
-            <P2PCreateProjectModal
-                visible={projectListModel.showCreateProjectModel}
-                close={() => {
-                  projectListModel.showCreateProjectModel = false;
-                }}
-                onOk={() => p2pProjectService.getProjectList()}
-            />
-          </div>
-        </EdgeRouteWrapper>
-        <Spin
-            spinning={projectListModel.projectListService.projectListLoading}
-            className={styles.spin}
+      <>
+        <div
+            className={classNames(styles.projectList, {
+              [styles.p2pProjectList]: isP2PWorkbench(pathname),
+            })}
         >
-          <div></div>
-        </Spin>
-        <h2>PSI</h2>
-        {projectList.length === 0 ? (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
-        ) : (
-            <div className={styles.content}>
-              <Table
-                  loading={projectListModel.projectListService.projectListLoading}
-                  dataSource={projectList}
-                  columns={columns}
-                  onChange={(pagination, filters, sorter) =>
-                      projectListModel.typeFilter(filters, sorter as {
-                        order: string;
-                        field: string
-                      })
-                  }
-                  size="small"
-                  rowKey={(record) => record.id as string}
+          <EdgeRouteWrapper>
+            <div className={styles.projectListHeader}>
+              {isP2PWorkbench(pathname) ? (
+                  <div className={styles.headerTitle}>我的项目</div>
+              ) : (
+                  <Space size="middle" wrap>
+                    <Input
+                        placeholder="搜索项目"
+                        onChange={(e) => searchProject(e)}
+                        style={{width: 200}}
+                        value={searchInput}
+                        suffix={
+                          <SearchOutlined
+                              style={{
+                                color: '#aaa',
+                              }}
+                          />
+                        }
+                    />
+                    <RadioGroup
+                        value={projectListModel.radioFilterState}
+                        onChange={projectListModel.changefilterState}
+                    />
+                  </Space>
+              )}
+              <Button type="primary" onClick={handleCreateProject}>
+                新建项目
+              </Button>
+              <P2PCreateProjectModal
+                  visible={projectListModel.showCreateProjectModel}
+                  close={() => {
+                    projectListModel.showCreateProjectModel = false;
+                  }}
+                  onOk={() => p2pProjectService.getProjectList()}
               />
             </div>
-        )}
-        {loadMore}
-        <h2>PriSql</h2>
-        {psProjectList.length === 0 ? (
-            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
-        ) : (
-            <div className={styles.prisqlList}>
-              {
-                psProjectList.map((item, index) => {
-                  return (
-                    <Card className={styles.prisqlCard} hoverable onClick={onClickPsProject}>
-                      {item.projectName}
-                    </Card>
-                  )
-                })
-              }
-            </div>
-        )}
-        {loadMoreForPS}
-      </div>
+          </EdgeRouteWrapper>
+          <Spin
+              spinning={projectListModel.projectListService.projectListLoading}
+              className={styles.spin}
+          >
+            <div></div>
+          </Spin>
+          <h2>PSI</h2>
+          {projectList.length === 0 ? (
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+          ) : (
+              <div className={styles.content}>
+                <Table
+                    loading={projectListModel.projectListService.projectListLoading}
+                    dataSource={projectList}
+                    columns={columns}
+                    onChange={(pagination, filters, sorter) =>
+                        projectListModel.typeFilter(filters, sorter as {
+                          order: string;
+                          field: string
+                        })
+                    }
+                    size="small"
+                    rowKey={(record) => record.id as string}
+                />
+              </div>
+          )}
+          {loadMore}
+          <h2>PriSql</h2>
+          {psProjectList.length === 0 ? (
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+          ) : (
+              <div className={styles.prisqlList}>
+                {
+                  psProjectList.map((item, index) => {
+                    return (
+                        <Card className={styles.prisqlCard} hoverable onClick={onClickPsProject}>
+                          {item.projectName}
+                        </Card>
+                    )
+                  })
+                }
+              </div>
+          )}
+          {loadMoreForPS}
+        </div>
+        <Modal title="输出目录路径" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
+               okButtonProps={{ disabled: receiverOutputPath === '' }}>
+          <Input placeholder="请输入输出目录路径"
+                 type="text"
+                 value={receiverOutputPath}
+                 onChange={e => setReceiverOutputPath(e.target.value)}/>
+        </Modal>
+      </>
   );
 };
 
