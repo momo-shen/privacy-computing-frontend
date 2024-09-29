@@ -25,7 +25,7 @@ const avatar = {
   // autonomy 和 edge 头像相同
   localLink: edgeImgLink,
   offlineLink: edgeOfflineImgLink,
-  localStorageKey: 'secretpad-autonomy',
+  localStorageKey: 'pc-autonomy',
 };
 
 export const HeaderComponent = () => {
@@ -75,7 +75,6 @@ export const HeaderComponent = () => {
             {platformConfig.header.logo ? platformConfig.header.logo : <Logo />}
           </div>
         }
-        <span className={styles.subTitle}>{layoutService.subTitle}</span>
         {viewInstance.showMyNode(pathname) && (
           <>
             <span className={styles.line} />
@@ -123,22 +122,8 @@ export const HeaderComponent = () => {
 };
 
 export class HeaderModel extends Model {
-  homeLayoutService = getModel(HomeLayoutService);
 
   nodeName = '';
-
-  showChangePasswordModel = false;
-
-  goto(url: string) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.click();
-  }
-
-  showGoToHome = (path: string) => {
-    return path.startsWith('/node');
-  };
 
   showMyNode = (path: string) => {
     const pathnameToShowNode = ['/node', '/message', '/edge'];

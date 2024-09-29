@@ -7,9 +7,9 @@ import { SwitchCard } from '@/components/switch-card';
 import { HeaderModel } from '@/modules/layout/home-layout/header-view';
 import { useModel } from '@/util/valtio-helper';
 
-import { computeFuncList } from './compute-func-data';
+import {computeFuncList, ProjectType} from './compute-func-data';
 import styles from './index.less';
-import { P2PCreateProjectService } from './p2p-create-project.service';
+import {P2pProjectListService} from "@/modules/p2p-project-list/p2p-project-list.service";
 
 interface ICreateProjectModal {
   visible: boolean;
@@ -23,9 +23,10 @@ export const P2PCreateProjectModal = ({
   close,
   onOk,
 }: ICreateProjectModal) => {
+  const projectService = useModel(P2pProjectListService);
+
   const [form] = Form.useForm();
 
-  const viewInstance = useModel(P2PCreateProjectService);
   const headerModel = useModel(HeaderModel);
 
   const projectName = Form.useWatch('projectName', form);
@@ -33,16 +34,8 @@ export const P2PCreateProjectModal = ({
 
   const { nodeId } = parse(window.location.search);
 
-  React.useEffect(() => {
-    if (visible && nodeId) {
-      viewInstance.getNodeList(nodeId as string);
-      // viewInstance.getNodeData(nodeId as string);
-    }
-  }, [nodeId, visible]);
-
   const handleClose = () => {
     close();
-    viewInstance.loading = false;
   };
 
   const handleOk = () => {
@@ -50,8 +43,16 @@ export const P2PCreateProjectModal = ({
       // await viewInstance.createProject(value);
       // handleClose();
       // onOk && onOk();
+      if (value.computeFunc === ProjectType.PSI) {
+        history.push('/psi')
+      } else if (value.computeFunc === ProjectType.PSQL) {
+        console.log("hhh")
+        projectService.createPsProject({
+          projectName: value.projectName
+        });
+      }
+      handleClose();
     });
-    history.push('/psi')
   };
 
   return (
@@ -71,7 +72,6 @@ export const P2PCreateProjectModal = ({
               [styles.buttonDisable]: !projectName ,
               // [styles.buttonDisable]: !projectName || !nodes || nodes.length < 1,  修改创建按钮状态
             })}
-            loading={viewInstance.loading}
           >
             创建
           </Button>
@@ -124,7 +124,7 @@ export const P2PCreateProjectModal = ({
           required
           className={styles.formLabelItem}
           name="computeFunc"
-          initialValue={computeFuncList[1].type}
+          initialValue={computeFuncList[0].type}
         >
           <SwitchCard cardList={computeFuncList} />
         </Form.Item>

@@ -1,5 +1,5 @@
 import {SearchOutlined} from '@ant-design/icons';
-import {Empty, Table, Tag} from 'antd';
+import {Card, Empty, Table, Tag} from 'antd';
 import {Button, Typography, Tooltip, Input, Space} from 'antd';
 import {Spin} from 'antd';
 import classNames from 'classnames';
@@ -12,7 +12,6 @@ import {history, useLocation} from 'umi';
 import {
   P2PCreateProjectModal
 } from '@/modules/create-project/p2p-create-project/p2p-create-project.view';
-import {EditProjectModal} from '@/modules/project-list/components/edit-project';
 import {getModel, Model, useModel} from '@/util/valtio-helper';
 
 import {
@@ -23,6 +22,7 @@ import {
 import styles from './index.less';
 import {P2pProjectListService} from './p2p-project-list.service';
 import type {FilterValue} from "antd/es/table/interface";
+import {ColumnsType} from "antd/es/table";
 
 export const EdgeRouteWrapper = (props: { children?: React.ReactNode }) => {
   const {children} = props;
@@ -39,7 +39,7 @@ export const P2pProjectListComponent: React.FC = () => {
   const projectListModel = useModel(ProjectListModel);
   const p2pProjectService = useModel(P2pProjectListService);
 
-  const columns = [
+  const columns: ColumnsType<API.PsiReqeust> = [
     {
       title: '项目名称',
       dataIndex: 'projectName',
@@ -72,11 +72,7 @@ export const P2pProjectListComponent: React.FC = () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      width: '15%',
-      defaultSortOrder: 'descend',
-      sorter: (a, b) => {
-        return new Date(a.createTime) > new Date(b.createTime) ? 1 : -1;
-      },
+      width: '15%'
     },
     {
       title: '操作',
@@ -85,9 +81,9 @@ export const P2pProjectListComponent: React.FC = () => {
       render: (text: string, record: any) => {
         return record.receiverId === ownerId && record.status === 'pending' &&
             (<><Button onClick={() =>
-                p2pProjectService.handleProject(record.id, 'accept')}>接受</Button>
+                p2pProjectService.handleProject(record.id, 'accepted')}>接受</Button>
               <Button onClick={() =>
-                  p2pProjectService.handleProject(record.id, 'reject')}>拒绝</Button></>)
+                  p2pProjectService.handleProject(record.id, 'rejected')}>拒绝</Button></>)
       }
     }
   ];
@@ -96,21 +92,33 @@ export const P2pProjectListComponent: React.FC = () => {
 
   const {handleCreateProject} = projectListModel;
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const {displayProjectList: projectList} = p2pProjectService;
+
+  const {displayPsProjectList: psProjectList} = p2pProjectService;
 
   const {nodeId} = parse(window.location.search);
 
   useEffect(() => {
     p2pProjectService.getProjectList();
+    p2pProjectService.getPsProjectList();
   }, []);
-
-  const [editProjectData, setEditProjectData] = useState({});
 
   const {Link} = Typography;
 
   const loadMore = projectList.length > 6 && (
+      <div className={styles.showAll}>
+        <Link
+            style={{color: 'rgba(0,0,0,0.45)'}}
+            onClick={() => {
+              history.push(`/edge?nodeId=${nodeId}&tab=my-project`);
+            }}
+        >
+          查看全部
+        </Link>
+      </div>
+  );
+
+  const loadMoreForPS = psProjectList.length > 6 && (
       <div className={styles.showAll}>
         <Link
             style={{color: 'rgba(0,0,0,0.45)'}}
@@ -132,9 +140,7 @@ export const P2pProjectListComponent: React.FC = () => {
   useEffect(() => {
     setSearchInput('');
   }, [
-    projectListModel.radioFilterState,
-    projectListModel.computeMode,
-    projectListModel.selectState,
+    projectListModel.radioFilterState
   ]);
 
   const isP2PWorkbench = (pathname: string) => {
@@ -142,6 +148,10 @@ export const P2pProjectListComponent: React.FC = () => {
     const {tab} = parse(search);
     return pathname === '/edge' && tab === 'workbench';
   };
+
+  const onClickPsProject = () => {
+    history.push('/prisql')
+  }
 
   return (
       <div
@@ -192,6 +202,7 @@ export const P2pProjectListComponent: React.FC = () => {
         >
           <div></div>
         </Spin>
+        <h2>PSI</h2>
         {projectList.length === 0 ? (
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
         ) : (
@@ -212,12 +223,23 @@ export const P2pProjectListComponent: React.FC = () => {
             </div>
         )}
         {loadMore}
-        <EditProjectModal
-            isModalOpen={isModalOpen}
-            handleCancel={() => setIsModalOpen(false)}
-            data={editProjectData}
-            onEdit={p2pProjectService.projectEdit}
-        />
+        <h2>PriSql</h2>
+        {psProjectList.length === 0 ? (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+        ) : (
+            <div className={styles.prisqlList}>
+              {
+                psProjectList.map((item, index) => {
+                  return (
+                    <Card className={styles.prisqlCard} hoverable onClick={onClickPsProject}>
+                      {item.projectName}
+                    </Card>
+                  )
+                })
+              }
+            </div>
+        )}
+        {loadMoreForPS}
       </div>
   );
 };

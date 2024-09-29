@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "secretpad",
+  "name": "pc",
   "scripts": {
     "dev": "umi dev",
     "build": "umi build",

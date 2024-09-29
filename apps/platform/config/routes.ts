@@ -15,6 +15,11 @@ export const routes = [
         component: 'psi',
         wrappers: [],
       },
+      {
+        path: '/prisql',
+        component: 'prisql',
+        wrappers: [],
+      },
       { path: '/*', redirect: '/login' },
     ],
   },
