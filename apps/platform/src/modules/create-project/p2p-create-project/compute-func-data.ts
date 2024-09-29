@@ -16,7 +16,7 @@ export const computeFuncList = [
   {
     type: ProjectType.PSQL,
     name: 'PriSQL',
-    description: '使得可以在多个部门数据间执行安全的数据查询而不会泄露各部门私有数据',
+    description: '在多个部门数据间执行安全的数据查询而不泄露各部门私有数据',
     minimap: P2pMpcImg,
   }
 ];

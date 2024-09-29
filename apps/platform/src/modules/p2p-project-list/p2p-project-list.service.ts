@@ -5,8 +5,11 @@ import { Model } from '@/util/valtio-helper';
 
 export class P2pProjectListService extends Model {
   projectList: API.PsiReqeust[] = [];
+  psProjectList: API.PriSqlRequest[] = [];
   displayProjectList: API.PsiReqeust[] = [];
+  displayPsProjectList: API.PriSqlRequest[] = [];
   projectListLoading = false;
+  psProjectListLoading = false;
 
   nodeId: string | undefined = undefined;
 
@@ -24,8 +27,8 @@ export class P2pProjectListService extends Model {
     const data = response.requests;
     this.projectList = data || [];
     this.projectListLoading = false;
-    this.displayProjectList = this.projectList.reverse();
-    return this.projectList.reverse();
+    this.displayProjectList = this.projectList;
+    return this.projectList;
   };
 
   createProject = async (psiReqeust: API.PsiReqeust) => {
@@ -37,4 +40,35 @@ export class P2pProjectListService extends Model {
     await API.PsiController.handleProject(id, action);
     await this.getProjectList();
   };
+
+  getPsProjectList = async () => {
+    this.psProjectList = [
+      {
+        id: 1,
+        projectName: '项目1'
+      },
+      {
+        id: 2,
+        projectName: '项目2'
+      },
+      {
+        id: 3,
+        projectName: '项目3'
+      },
+      {
+        id: 4,
+        projectName: '项目4'
+      },
+      {
+        id: 5,
+        projectName: '项目5'
+      }
+    ];
+    this.displayPsProjectList = this.psProjectList;
+    return this.psProjectList;
+  }
+
+  createPsProject = async (priSqlRequest: API.PriSqlRequest) => {
+    this.displayPsProjectList.push(priSqlRequest);
+  }
 }

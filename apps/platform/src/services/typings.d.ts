@@ -18,4 +18,10 @@ declare namespace API {
     status?: string;
     createTime?: Date;
   }
+
+  interface PriSqlRequest {
+    id?: number;
+    projectName?: string;
+    senderId?: string;
+  }
 }

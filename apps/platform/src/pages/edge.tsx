@@ -27,12 +27,12 @@ const menuItems: {
     component: <P2PWorkbenchComponent />,
     key: 'workbench',
   },
-  {
-    label: '合作节点',
-    icon: <Icon component={CooperativeNode} />,
-    component: <CooperativeNodeListComponent />,
-    key: 'connected-node',
-  },
+  // {
+  //   label: '合作节点',
+  //   icon: <Icon component={CooperativeNode} />,
+  //   component: <CooperativeNodeListComponent />,
+  //   key: 'connected-node',
+  // },
   {
     label: '我的项目',
     icon: <Icon component={projectManager} />,
@@ -48,7 +48,6 @@ const EdgePage = () => {
   useEffect(() => {
     const getNodeList = async () => {
     };
-    homeLayoutService.setSubTitle('Edge');
     getNodeList();
   }, []);
   return (
