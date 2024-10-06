@@ -4,10 +4,10 @@ import API from '@/services';
 import { Model } from '@/util/valtio-helper';
 
 export class P2pProjectListService extends Model {
-  projectList: API.PsiReqeust[] = [];
-  psProjectList: API.PriSqlRequest[] = [];
-  displayProjectList: API.PsiReqeust[] = [];
-  displayPsProjectList: API.PriSqlRequest[] = [];
+  projectList: API.PsiProject[] = [];
+  psProjectList: API.PriSqlProject[] = [];
+  displayProjectList: API.PsiProject[] = [];
+  displayPsProjectList: API.PriSqlProject[] = [];
   projectListLoading = false;
   psProjectListLoading = false;
 
@@ -22,17 +22,17 @@ export class P2pProjectListService extends Model {
 
   getProjectList = async () => {
     this.projectListLoading = true;
-    const ownerId: string = localStorage.getItem('ownerId') || '';
-    const response = await API.PsiController.getProjectList(ownerId);
-    const data = response.requests;
+    const userId: string = localStorage.getItem('userId') || '';
+    const response = await API.PsiController.getProjectList(userId);
+    const data = response.data;
     this.projectList = data || [];
     this.projectListLoading = false;
     this.displayProjectList = this.projectList;
     return this.projectList;
   };
 
-  createProject = async (psiReqeust: API.PsiReqeust) => {
-    await API.PsiController.createProject(psiReqeust);
+  createProject = async (psiProject: API.PsiProject) => {
+    await API.PsiController.createProject(psiProject);
     await this.getProjectList();
   }
 
@@ -44,31 +44,41 @@ export class P2pProjectListService extends Model {
   getPsProjectList = async () => {
     this.psProjectList = [
       {
-        id: 1,
-        projectName: '项目1'
+        id: '1',
+        projectName: '项目1',
+        owner: 'alice',
+        members: []
       },
       {
-        id: 2,
-        projectName: '项目2'
+        id: '2',
+        projectName: '项目2',
+        owner: 'alice',
+        members: []
       },
       {
-        id: 3,
-        projectName: '项目3'
+        id: '3',
+        projectName: '项目3',
+        owner: 'alice',
+        members: []
       },
       {
-        id: 4,
-        projectName: '项目4'
+        id: '4',
+        projectName: '项目4',
+        owner: 'bob',
+        members: []
       },
       {
-        id: 5,
-        projectName: '项目5'
+        id: '5',
+        projectName: '项目5',
+        owner: 'bob',
+        members: ['alice']
       }
     ];
     this.displayPsProjectList = this.psProjectList;
     return this.psProjectList;
   }
 
-  createPsProject = async (priSqlRequest: API.PriSqlRequest) => {
-    this.displayPsProjectList.push(priSqlRequest);
+  createPsProject = async (priSqlProject: API.PriSqlProject) => {
+    this.displayPsProjectList.push(priSqlProject);
   }
 }

@@ -1,24 +1,24 @@
 import request from 'umi-request';
 
-export async function getProjectList(ownerId: string) {
-    return request('/pc/api/psi/request/list', {
+export async function getProjectList(userId: string) {
+    return request('/pc/api/psi/project/list', {
         method: 'GET',
-        params: { ownerId: ownerId },
+        params: { userId: userId },
     });
 }
 
-export async function createProject(psiReqeust: API.PsiReqeust) {
-    return request('/pc/api/psi/request/create', {
+export async function createProject(psiProject: API.PsiProject) {
+    return request('/pc/api/psi/project/create', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        data: JSON.stringify(psiReqeust),
+        data: JSON.stringify(psiProject),
     });
 }
 
 export async function handleProject(id: string, action: string, receiverOutputPath: string) {
-    return request(`/pc/api/psi/request/${id}/action`, {
+    return request(`/pc/api/psi/project/${id}/action`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

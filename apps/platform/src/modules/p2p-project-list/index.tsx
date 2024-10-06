@@ -29,12 +29,12 @@ export const EdgeRouteWrapper = (props: { children?: React.ReactNode }) => {
 
   const {pathname} = useLocation();
   if (children === undefined || children === null) return null;
-  if (pathname !== '/edge') return null;
-  return <>{pathname === '/edge' && <>{children}</>}</>;
+  if (pathname !== '/home') return null;
+  return <>{pathname === '/home' && <>{children}</>}</>;
 };
 
 export const P2pProjectListComponent: React.FC = () => {
-  const ownerId = localStorage.getItem('ownerId');
+  const userId = localStorage.getItem('userId');
 
   const projectListModel = useModel(ProjectListModel);
   const p2pProjectService = useModel(P2pProjectListService);
@@ -43,7 +43,7 @@ export const P2pProjectListComponent: React.FC = () => {
   const [recordId, setRecordId] = useState('');
   const [receiverOutputPath, setReceiverOutputPath] = useState('');
 
-  const handleOk = async() => {
+  const handleOk = async () => {
     await p2pProjectService.handleProject(recordId, 'accepted', receiverOutputPath);
     setIsModalOpen(false);
   };
@@ -57,7 +57,7 @@ export const P2pProjectListComponent: React.FC = () => {
     setRecordId(recordId);
   }
 
-  const columns: ColumnsType<API.PsiReqeust> = [
+  const columns: ColumnsType<API.PsiProject> = [
     {
       title: '项目名称',
       dataIndex: 'projectName',
@@ -97,7 +97,7 @@ export const P2pProjectListComponent: React.FC = () => {
       dataIndex: ['receiverId', 'status'],
       width: '15%',
       render: (text: string, record: any) => {
-        return record.receiverId === ownerId && record.status === 'pending' &&
+        return record.receiverId === userId && record.status === 'pending' &&
             (<><Button onClick={() => acceptProject(record.id)}>接受</Button>
               <Button onClick={() =>
                   p2pProjectService.handleProject(record.id, 'rejected', '')}>拒绝</Button></>)
@@ -127,7 +127,7 @@ export const P2pProjectListComponent: React.FC = () => {
         <Link
             style={{color: 'rgba(0,0,0,0.45)'}}
             onClick={() => {
-              history.push(`/edge?nodeId=${nodeId}&tab=my-project`);
+              history.push(`/home?nodeId=${nodeId}&tab=my-project`);
             }}
         >
           查看全部
@@ -140,7 +140,7 @@ export const P2pProjectListComponent: React.FC = () => {
         <Link
             style={{color: 'rgba(0,0,0,0.45)'}}
             onClick={() => {
-              history.push(`/edge?nodeId=${nodeId}&tab=my-project`);
+              history.push(`/home?nodeId=${nodeId}&tab=my-project`);
             }}
         >
           查看全部
@@ -148,10 +148,19 @@ export const P2pProjectListComponent: React.FC = () => {
       </div>
   );
 
+  const acceptPSProject = (id: string | undefined) => {
+
+  };
+
+  const rejectPSProject = (id: string | undefined) => {
+
+  };
+
   const [searchInput, setSearchInput] = useState('');
   const searchProject = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
     projectListModel.searchProject(e.target.value);
+    projectListModel.searchPsProject(e.target.value);
   };
 
   useEffect(() => {
@@ -163,11 +172,13 @@ export const P2pProjectListComponent: React.FC = () => {
   const isP2PWorkbench = (pathname: string) => {
     const {search} = window.location;
     const {tab} = parse(search);
-    return pathname === '/edge' && tab === 'workbench';
+    return pathname === '/home' && tab === 'workbench';
   };
 
-  const onClickPsProject = () => {
-    history.push('/prisql')
+  const onClickPsProject = (item: API.PriSqlProject) => {
+    if (item.owner === userId || (item.members && userId && item.members.indexOf(userId) > -1)) {
+      history.push(`/prisql?nodeId=${nodeId}`);
+    }
   }
 
   return (
@@ -249,8 +260,19 @@ export const P2pProjectListComponent: React.FC = () => {
                 {
                   psProjectList.map((item, index) => {
                     return (
-                        <Card className={styles.prisqlCard} hoverable onClick={onClickPsProject}>
-                          {item.projectName}
+                        <Card className={styles.prisqlCard} hoverable onClick={() => onClickPsProject(item)}>
+                          <div className={styles.prisqlCardInfo}>
+                            <div>
+                              <div>{item.projectName}</div>
+                              <div style={{textWrap: 'nowrap'}}>Owner: {item.owner}</div>
+                            </div>
+                            {item.owner !== userId && item.members && userId && item.members.indexOf(userId) < 0 && (
+                                <div className={styles.prisqlCardOp}>
+                                  <Button onClick={e => {e.stopPropagation(); acceptPSProject(item.id)}}>接受</Button>
+                                  <Button style={{marginTop: '4px'}} onClick={e => {e.stopPropagation(); rejectPSProject(item.id)}}>拒绝</Button>
+                                </div>
+                            )}
+                          </div>
                         </Card>
                     )
                   })
@@ -260,7 +282,7 @@ export const P2pProjectListComponent: React.FC = () => {
           {loadMoreForPS}
         </div>
         <Modal title="输出目录路径" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
-               okButtonProps={{ disabled: receiverOutputPath === '' }}>
+               okButtonProps={{disabled: receiverOutputPath === ''}}>
           <Input placeholder="请输入输出目录路径"
                  type="text"
                  value={receiverOutputPath}
@@ -307,11 +329,29 @@ export class ProjectListModel extends Model {
             return i.receiverId === this.nodeId;
           }
         });
+    this.projectListService.displayPsProjectList =
+        this.projectListService.psProjectList.filter((i) => {
+          if (value === RadioGroupState.ALL) {
+            return i;
+          } else if (value === RadioGroupState.APPLY) {
+            return i.owner === this.nodeId;
+          } else if (value === RadioGroupState.PROCESS) {
+            return i.owner !== this.nodeId;
+          }
+        });
   };
 
   searchProject = (value: string) => {
     this.projectListService.displayProjectList =
         this.projectListService.projectList.filter((i) => {
+          if (!i.projectName) return;
+          return i.projectName?.indexOf(value) >= 0;
+        });
+  };
+
+  searchPsProject = (value: string) => {
+    this.projectListService.displayPsProjectList =
+        this.projectListService.psProjectList.filter((i) => {
           if (!i.projectName) return;
           return i.projectName?.indexOf(value) >= 0;
         });

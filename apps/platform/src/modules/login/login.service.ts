@@ -17,9 +17,9 @@ export class LoginService extends Model {
     };
     const data = {
       token: "token",
-      ownerId: loginField.name,
+      userId: loginField.name,
     };
-    localStorage.setItem('ownerId', loginField.name);
+    localStorage.setItem('userId', loginField.name);
     return { status, data };
   }
 
@@ -27,7 +27,7 @@ export class LoginService extends Model {
     if (!this.userInfo) {
       const data = {
         token: "token",
-        ownerId: localStorage.getItem('ownerId'),
+        userId: localStorage.getItem('userId'),
       };
       this.userInfo = data as User;
     }
@@ -37,7 +37,7 @@ export class LoginService extends Model {
 
 export interface User {
   token: string;
-  ownerId: string; // 	NODE的话这里存nodeId
+  userId: string;
 }
 export interface UserInfo {
   user: User | null;

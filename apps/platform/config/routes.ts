@@ -4,10 +4,10 @@ export const routes = [
     wrappers: ['@/wrappers/theme-wrapper', '@/wrappers/login-auth'],
     component: '@/modules/layout/layout.view',
     routes: [
-      { path: '/', component: 'edge', wrappers: ['@/wrappers/basic-node-auth', '@/wrappers/p2p-login-auth'] },
+      { path: '/', component: 'login' },
       {
-        path: '/edge',
-        component: 'edge',
+        path: '/home',
+        component: 'home',
         wrappers: ['@/wrappers/basic-node-auth', '@/wrappers/p2p-login-auth'],
       },
       {
@@ -22,10 +22,6 @@ export const routes = [
       },
       { path: '/*', redirect: '/login' },
     ],
-  },
-  {
-    path: '/',
-    redirect: '/login'
   },
   {
     path: '/login',

@@ -1,5 +1,5 @@
 declare namespace API {
-  interface PsiReqeust {
+  interface PsiProject {
     id?: string;
     projectName?: string;
     senderId?: string;
@@ -19,9 +19,10 @@ declare namespace API {
     createTime?: Date;
   }
 
-  interface PriSqlRequest {
-    id?: number;
+  interface PriSqlProject {
+    id?: string;
     projectName?: string;
-    senderId?: string;
+    owner?: string;
+    members?: string[];
   }
 }

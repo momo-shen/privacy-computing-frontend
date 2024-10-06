@@ -13,7 +13,7 @@ import styles from './index.less';
 type ManagementLayoutComponentProps = {
   menuItems: {
     label: string;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     component: React.ReactNode;
     key: string;
   }[];

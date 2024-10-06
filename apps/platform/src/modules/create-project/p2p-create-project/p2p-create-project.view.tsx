@@ -2,7 +2,7 @@ import { Input, Form, Drawer, Button, Space, Radio, Tooltip, Alert } from 'antd'
 import classnames from 'classnames';
 import { parse } from 'query-string';
 import React from 'react';
-import { history } from 'umi';
+import {history, useLocation} from 'umi';
 import { SwitchCard } from '@/components/switch-card';
 import { HeaderModel } from '@/modules/layout/home-layout/header-view';
 import { useModel } from '@/util/valtio-helper';
@@ -28,6 +28,9 @@ export const P2PCreateProjectModal = ({
 
   const projectName = Form.useWatch('projectName', form);
 
+  const { search, pathname } = useLocation();
+  const { nodeId } = parse(search);
+
   const handleClose = () => {
     close();
   };
@@ -35,9 +38,8 @@ export const P2PCreateProjectModal = ({
   const handleOk = () => {
     form.validateFields().then(async (value) => {
       if (value.computeFunc === ProjectType.PSI) {
-        history.push('/psi', {projectName: value.projectName});
+        history.push(`/psi?nodeId=${nodeId}`, {projectName: value.projectName});
       } else if (value.computeFunc === ProjectType.PSQL) {
-        console.log("hhh")
         projectService.createPsProject({
           projectName: value.projectName
         });

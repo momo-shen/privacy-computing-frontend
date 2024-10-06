@@ -3,11 +3,6 @@ import { Outlet } from 'umi';
 
 import styles from './index.less';
 
-export enum GlobalLayout {
-  main = 'main',
-  drawer = 'drawer',
-}
-
 const GlobalLayoutComponent = () => {
   return (
     <App style={{ height: '100%' }}>

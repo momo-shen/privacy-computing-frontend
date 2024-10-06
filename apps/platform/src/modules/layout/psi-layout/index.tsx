@@ -16,7 +16,7 @@ export const PsiLayout = () => {
   const [activeTab, setActiveTab] = useState('1');
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const senderId = localStorage.getItem('ownerId') || '';
+  const senderId = localStorage.getItem('userId') || '';
   const p2pProjectService = useModel(P2pProjectListService);
 
   const handleAliceSubmit = async () => {
@@ -24,7 +24,7 @@ export const PsiLayout = () => {
     let jsonData = await form.validateFields();
     const senderIpRes = await getIp();
     let senderIp = senderIpRes.ip;
-    let psiRequest: API.PsiReqeust = {
+    let psiProject: API.PsiProject = {
       projectName: projectName,
       senderId: senderId,
       senderIp: senderIp,
@@ -39,8 +39,8 @@ export const PsiLayout = () => {
       receiverInter: jsonData.receiverInter,
       protocol: jsonData.protocol,
     };
-    console.log(psiRequest);
-    p2pProjectService.createProject(psiRequest).then(res => {
+    console.log(psiProject);
+    p2pProjectService.createProject(psiProject).then(res => {
       message.info({
         type: 'success',
         content: '发送请求成功',

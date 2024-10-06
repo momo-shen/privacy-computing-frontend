@@ -39,9 +39,9 @@ export class LoginModel extends Model {
     this.loginService.userInfo = data as User;
     if (status?.code === 0) {
       localStorage.setItem('User-Token', this.token);
-      if (this.loginService.userInfo.ownerId) {
+      if (this.loginService.userInfo.userId) {
         localStorage.setItem('neverLogined', 'true');
-        history.push(`/edge?nodeId=${this.loginService.userInfo.ownerId}`);
+        history.push(`/home?nodeId=${this.loginService.userInfo.userId}`);
         message.success('登录成功');
         return;
       }
