@@ -41,7 +41,9 @@ export const P2PCreateProjectModal = ({
         history.push(`/psi?nodeId=${nodeId}`, {projectName: value.projectName});
       } else if (value.computeFunc === ProjectType.PSQL) {
         projectService.createPsProject({
-          projectName: value.projectName
+          projectName: value.projectName,
+          owner: nodeId as string,
+          members: []
         });
       }
       handleClose();

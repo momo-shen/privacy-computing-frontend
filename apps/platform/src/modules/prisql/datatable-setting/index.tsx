@@ -1,7 +1,7 @@
 import React, {type ChangeEvent, useEffect, useState} from 'react';
 import {Button, Empty, Form, Input, message, Modal, Select, Space, Table} from 'antd';
 import {SearchOutlined} from "@ant-design/icons";
-import {Plus} from "lucide-react";
+import {MinusSquare, Plus} from "lucide-react";
 import styles from "@/modules/p2p-project-list/index.less";
 import './index.less';
 
@@ -31,7 +31,18 @@ export const DatatableSetting = () => {
   };
 
   const changeCCL = () => {
+    let flag = false;
+    cclList.forEach((ccl) => {
+      if (ccl.userId === '' || ccl.column === '' || ccl.access === '') {
+        flag = true;
+      }
+    });
+    if (flag) {
+      message.error('请填写完整');
+      return;
+    }
     setIsConfigModalOpen(false);
+    console.log(cclList);
   };
 
   const handleAddModalCancel = () => {
@@ -129,26 +140,68 @@ export const DatatableSetting = () => {
       title: '列',
       dataIndex: 'column',
       key: 'column',
+      render: (text: string, record: any) => (
+          <Input
+              value={text}
+              size="small"
+              style={{width: '100%'}}
+              required
+              onChange={(e) => {
+                const newCclList = cclList.map((c) => {
+                  if (c.id === record.id) {
+                    return {
+                      ...c,
+                      'column': e.target.value,
+                    };
+                  }
+                  return c;
+                });
+                setCclList(newCclList);
+              }}
+          />
+      ),
     },
     {
       title: '用户id',
       dataIndex: 'userId',
       key: 'userId',
+      render: (text: string, record: any) => (
+          <Input
+              value={text}
+              size="small"
+              style={{width: '100%'}}
+              required
+              onChange={(e) => {
+                const newCclList = cclList.map((c) => {
+                  if (c.id === record.id) {
+                    return {
+                      ...c,
+                      'userId': e.target.value,
+                    };
+                  }
+                  return c;
+                });
+                setCclList(newCclList);
+              }}
+          />
+      ),
     },
     {
       title: '列权限',
       dataIndex: 'access',
       key: 'access',
+      width: '40%',
       render: (text: string, record: any) => (
           <Select
               options={CONSTRAINT.map((c) => ({label: c, value: c}))}
               value={text}
               size="small"
-              style={{width: 260}}
+              style={{width: '100%'}}
               popupClassName="ccl-select"
+              defaultValue={Constraint.UNKNOWN}
               onChange={(value) => {
                 const newCclList = cclList.map((c) => {
-                  if (c.column === record.column) {
+                  if (c.id === record.id) {
                     return {
                       ...c,
                       'access': value,
@@ -160,7 +213,25 @@ export const DatatableSetting = () => {
               }}
           />
       ),
-    }];
+    },
+    {
+      title: '操作',
+      dataIndex: ['id'],
+      render: (text: string, record: any) => (
+          <MinusSquare
+              size={14}
+              color="#182431"
+              cursor="pointer"
+              onClick={() => removeAccess(record.id)}
+          />
+      ),
+    },
+  ];
+
+  const removeAccess = (id: string) => {
+    const newCclList = cclList.filter((c) => c.id !== id);
+    setCclList(newCclList);
+  };
 
   const onBtnClick = (key: string, id?: string) => {
     switch (key) {
@@ -181,8 +252,14 @@ export const DatatableSetting = () => {
     }
   };
 
-  const addColumn = () => {
-
+  const addCcl = () => {
+    const newCclList = [...cclList, {
+      id: String(Number(cclList[cclList.length - 1].id) + 1),
+      column: '',
+      userId: '',
+      access: ''
+    }];
+    setCclList(newCclList);
   };
 
   return (
@@ -269,16 +346,16 @@ export const DatatableSetting = () => {
           <Table
               className="ccl-table"
               dataSource={cclList}
-              rowKey="column"
+              rowKey="id"
               pagination={false}
               columns={cclColumns}
               size="small"
           />
           <Button
               type="dashed"
-              onClick={() => addColumn()}
+              onClick={() => addCcl()}
               block
-              icon={<Plus size={16} color="#182431" />}
+              icon={<Plus size={16} color="#182431"/>}
           >
             增加列
           </Button>

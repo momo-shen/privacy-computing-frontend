@@ -52,7 +52,7 @@ export const PsiLayout = () => {
   return (
     <Spin spinning={loading}>
       <div className={styles.wrap}>
-        <Title level={2} style={{textAlign: 'left', margin: '16px 0'}}>PSI</Title>
+        <Title level={2} style={{textAlign: 'left', margin: '16px 0'}}>PSI - {projectName}</Title>
         <Tabs defaultActiveKey="1" onChange={(key) => setActiveTab(key)}>
           <Tabs.TabPane tab="传输设置" key="1">
             <Form layout="vertical" form={form}>

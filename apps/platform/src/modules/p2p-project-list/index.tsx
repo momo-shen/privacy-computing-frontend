@@ -229,7 +229,6 @@ export const P2pProjectListComponent: React.FC = () => {
               spinning={projectListModel.projectListService.projectListLoading}
               className={styles.spin}
           >
-            <div></div>
           </Spin>
           <h2>PSI</h2>
           {projectList.length === 0 ? (
