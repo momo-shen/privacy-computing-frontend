@@ -26,28 +26,28 @@ export const LoginComponent: React.FC = () => {
 };
 
 export class LoginModel extends Model {
-  token = '';
   loginService = getModel(LoginService);
 
   loginConfirm = async (loginFields: UserInfo) => {
-    const { status, data } = await this.loginService.login({
-      name: loginFields.name,
-      password: loginFields.password,
-    });
+    let user: API.User = {
+      userId: loginFields.name,
+      userPassword: loginFields.password,
+    };
+    const result = await this.loginService.login(user);
+    const resJson = JSON.parse(JSON.stringify(result));
 
-    this.token = data?.token || '';
-    this.loginService.userInfo = data as User;
-    if (status?.code === 0) {
-      localStorage.setItem('User-Token', this.token);
+    this.loginService.userInfo = result.data as User;
+    if (resJson.status === "success") {
       if (this.loginService.userInfo.userId) {
         localStorage.setItem('neverLogined', 'true');
+        localStorage.setItem('userId', this.loginService.userInfo.userId);
         history.push(`/home?nodeId=${this.loginService.userInfo.userId}`);
         message.success('登录成功');
         return;
       }
       message.success('登录成功');
     } else {
-      message.error(status?.msg || '登录失败，请检查用户名或密码');
+      message.error('登录失败，请检查用户名或密码');
     }
   };
 }

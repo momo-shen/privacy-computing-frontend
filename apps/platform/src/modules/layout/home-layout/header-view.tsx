@@ -26,6 +26,7 @@ export const HeaderComponent = () => {
   const userId = localStorage.getItem('userId');
 
   const onLogout = () => {
+    localStorage.removeItem('userId');
     history.push('/login');
   };
 

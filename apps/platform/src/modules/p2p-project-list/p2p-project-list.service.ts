@@ -42,43 +42,24 @@ export class P2pProjectListService extends Model {
   };
 
   getPsProjectList = async () => {
-    this.psProjectList = [
-      {
-        id: '1',
-        projectName: '项目1',
-        owner: 'alice',
-        members: []
-      },
-      {
-        id: '2',
-        projectName: '项目2',
-        owner: 'alice',
-        members: []
-      },
-      {
-        id: '3',
-        projectName: '项目3',
-        owner: 'alice',
-        members: []
-      },
-      {
-        id: '4',
-        projectName: '项目4',
-        owner: 'bob',
-        members: []
-      },
-      {
-        id: '5',
-        projectName: '项目5',
-        owner: 'bob',
-        members: ['alice']
-      }
-    ];
+    this.psProjectListLoading = true;
+    const userId: string = localStorage.getItem('userId') || '';
+    const response = await API.PriSqlController.getProjectList(userId);
+    console.log(response)
+    const data = response.data;
+    this.psProjectList = data || [];
+    this.psProjectListLoading = false;
     this.displayPsProjectList = this.psProjectList;
     return this.psProjectList;
   }
 
   createPsProject = async (priSqlProject: API.PriSqlProject) => {
-    this.displayPsProjectList.push(priSqlProject);
+    await API.PriSqlController.createProject(priSqlProject);
+    await this.getPsProjectList();
+  }
+
+  handlePsProject = async (memberStatusId: string, action: string) => {
+    await API.PriSqlController.handleProject(memberStatusId, action);
+    await this.getPsProjectList();
   }
 }

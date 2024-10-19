@@ -148,14 +148,6 @@ export const P2pProjectListComponent: React.FC = () => {
       </div>
   );
 
-  const acceptPSProject = (id: string | undefined) => {
-
-  };
-
-  const rejectPSProject = (id: string | undefined) => {
-
-  };
-
   const [searchInput, setSearchInput] = useState('');
   const searchProject = (e: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -176,8 +168,8 @@ export const P2pProjectListComponent: React.FC = () => {
   };
 
   const onClickPsProject = (item: API.PriSqlProject) => {
-    if (item.owner === userId || (item.members && userId && item.members.indexOf(userId) > -1)) {
-      history.push(`/prisql?nodeId=${nodeId}`);
+    if (item.owner === userId || (item.member === userId && item.status === "accepted")) {
+      history.push(`/prisql?projectId=${item.projectId}&nodeId=${nodeId}`);
     }
   }
 
@@ -225,11 +217,6 @@ export const P2pProjectListComponent: React.FC = () => {
               />
             </div>
           </EdgeRouteWrapper>
-          <Spin
-              spinning={projectListModel.projectListService.projectListLoading}
-              className={styles.spin}
-          >
-          </Spin>
           <h2>PSI</h2>
           {projectList.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
@@ -250,7 +237,6 @@ export const P2pProjectListComponent: React.FC = () => {
                 />
               </div>
           )}
-          {loadMore}
           <h2>PriSql</h2>
           {psProjectList.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
@@ -262,13 +248,13 @@ export const P2pProjectListComponent: React.FC = () => {
                         <Card className={styles.prisqlCard} hoverable onClick={() => onClickPsProject(item)}>
                           <div className={styles.prisqlCardInfo}>
                             <div>
-                              <div>{item.projectName}</div>
+                              <div>{item.name}</div>
                               <div style={{textWrap: 'nowrap'}}>Owner: {item.owner}</div>
                             </div>
-                            {item.owner !== userId && item.members && userId && item.members.indexOf(userId) < 0 && (
+                            {item.owner !== userId && item.status === 'pending' && (
                                 <div className={styles.prisqlCardOp}>
-                                  <Button onClick={e => {e.stopPropagation(); acceptPSProject(item.id)}}>接受</Button>
-                                  <Button style={{marginTop: '4px'}} onClick={e => {e.stopPropagation(); rejectPSProject(item.id)}}>拒绝</Button>
+                                  <Button onClick={e => {e.stopPropagation(); p2pProjectService.handlePsProject(item.memberStatusId as string, "accepted")}}>接受</Button>
+                                  <Button style={{marginTop: '4px'}} onClick={e => {e.stopPropagation(); p2pProjectService.handlePsProject(item.memberStatusId as string, "rejected")}}>拒绝</Button>
                                 </div>
                             )}
                           </div>
@@ -278,7 +264,6 @@ export const P2pProjectListComponent: React.FC = () => {
                 }
               </div>
           )}
-          {loadMoreForPS}
         </div>
         <Modal title="输出目录路径" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}
                okButtonProps={{disabled: receiverOutputPath === ''}}>
@@ -351,8 +336,8 @@ export class ProjectListModel extends Model {
   searchPsProject = (value: string) => {
     this.projectListService.displayPsProjectList =
         this.projectListService.psProjectList.filter((i) => {
-          if (!i.projectName) return;
-          return i.projectName?.indexOf(value) >= 0;
+          if (!i.name) return;
+          return i.name?.indexOf(value) >= 0;
         });
   };
 

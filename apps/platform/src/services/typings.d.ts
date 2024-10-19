@@ -1,4 +1,10 @@
 declare namespace API {
+  interface User {
+    id?: string;
+    userId?: string;
+    userPassword?: string;
+  }
+
   interface PsiProject {
     id?: string;
     projectName?: string;
@@ -20,9 +26,45 @@ declare namespace API {
   }
 
   interface PriSqlProject {
-    id?: string;
-    projectName?: string;
+    projectId?: string;
+    memberStatusId?: string;
+    name?: string;
     owner?: string;
-    members?: string[];
+    member?: string;
+    status?: string;
+  }
+
+  interface PriSqlMemberStatus {
+    id?: string;
+    projectId?: string;
+    member?: string;
+    status?: string
+  }
+
+  interface PriSqlDatatable {
+    id?: string;
+    projectId?: string;
+    name?: string;
+    member?: string;
+    connectionStr?: string;
+  }
+
+  interface PriSqlColumnAccess {
+    id?: string;
+    datatableId?: number;
+    columnName?: string;
+    columnDatatype?: string;
+    member?: string;
+    access?: string;
+    rowId?: string;
+  }
+
+  interface PriSqlMyColumnAccess {
+    id?: string;
+    owner?: string;
+    datatableName?: string;
+    columnName?: string;
+    access?: string;
+    columnDatatype?: string;
   }
 }

@@ -89,7 +89,7 @@ export const ManagementLayoutComponent = (props: ManagementLayoutComponentProps)
           onSelect={({ key }) => {
             history.replace({
               pathname: pathname === '/' ? '/home' : pathname,
-              search: stringify(nodeId ? { nodeId, tab: key } : { tab: key }),
+              search: stringify(nodeId ? { ...parsedSearch, nodeId, tab: key } : { tab: key }),
             });
           }}
         />

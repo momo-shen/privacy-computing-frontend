@@ -1,32 +1,16 @@
-import sha256 from 'crypto-js/sha256';
-
 import { Model } from '@/util/valtio-helper';
-
-// import Base64 from 'crypto-js/enc-base64';
-// import sha256 from 'crypto-js/256';
-
-// console.log(Base64.stringify(sha256('message')));
+import API from '@/services';
 
 export class LoginService extends Model {
   userInfo: User | null = null;
 
-  async login(loginField: { name: string; password: string }) {
-    const status = {
-      code: 0,
-      msg: ""
-    };
-    const data = {
-      token: "token",
-      userId: loginField.name,
-    };
-    localStorage.setItem('userId', loginField.name);
-    return { status, data };
+  async login(user: API.User) {
+    return await API.UserController.login(user);
   }
 
   getUserInfo = async () => {
     if (!this.userInfo) {
       const data = {
-        token: "token",
         userId: localStorage.getItem('userId'),
       };
       this.userInfo = data as User;
@@ -36,7 +20,6 @@ export class LoginService extends Model {
 }
 
 export interface User {
-  token: string;
   userId: string;
 }
 export interface UserInfo {

@@ -4,45 +4,47 @@ import {SearchOutlined} from "@ant-design/icons";
 import {MinusSquare, Plus} from "lucide-react";
 import styles from "@/modules/p2p-project-list/index.less";
 import './index.less';
+import {
+  DatatableSettingService
+} from "@/modules/prisql/datatable-setting/datatable-setting.service";
+import {getModel, Model, useModel} from "@/util/valtio-helper";
+import {parse} from "query-string";
+import {useLocation} from "umi";
+import {toNumber} from "lodash";
 
 export const DatatableSetting = () => {
+  const datatableSettingListModel = useModel(DatatableSettingListModel);
   const [form] = Form.useForm();
+  const { search, pathname } = useLocation();
+  const { projectId } = parse(search);
+  const userId = localStorage.getItem('userId');
+  const datatableSettingService = useModel(DatatableSettingService);
+  const {displayDatatableList: datatableList} = datatableSettingService;
 
-  const [datatableList, setDatatableList] = useState<any[]>([
-    {id: "1", datatableName: 'ta', datatableSource: 'mysql:db1.tbl1'},
-    {id: "2", datatableName: 'tb', datatableSource: 'mysql:db2.tbl2'},
-  ]);
-
-  const [displayDatatableList, setDisplayDatatableList] = useState<any[]>([]);
-
-  const [cclList, setCclList] = useState<any[]>([
-    {id: "1", column: 'id', userId: 'bob', access: 'PLAINTEXT'},
-    {id: "2", column: 'age', userId: 'bob', access: 'PLAINTEXT_AFTER_COMPARE'},
-  ]);
+  useEffect(() => {
+    datatableSettingService.getDatatableList(projectId as string, userId as string);
+  }, []);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-
-  const [selectedDatatableId, setSelectedDatatableId] = useState('');
-
-  const getTableCCL = () => {
-
-  };
+  const [selectedDatatableId, setSelectedDatatableId] = useState(0);
+  const {cclListTmp: cclList} = datatableSettingService;
+  const [cclListTmp2, setCclListTmp2] = useState<API.PriSqlColumnAccess[]>([]);
 
   const changeCCL = () => {
     let flag = false;
     cclList.forEach((ccl) => {
-      if (ccl.userId === '' || ccl.column === '' || ccl.access === '') {
+      if (ccl.member === '' || ccl.columnName === '' || ccl.columnDatatype === '' || ccl.access === '') {
         flag = true;
       }
     });
     if (flag) {
       message.error('请填写完整');
       return;
+    } else {
+      datatableSettingService.handleCclList(selectedDatatableId, cclList);
+      setIsConfigModalOpen(false);
     }
-    setIsConfigModalOpen(false);
-    console.log(cclList);
   };
 
   const handleAddModalCancel = () => {
@@ -53,27 +55,21 @@ export const DatatableSetting = () => {
     setIsConfigModalOpen(false);
   };
 
-  useEffect(() => {
-    setDisplayDatatableList(datatableList);
-  }, []);
-
   const addDatatable = () => {
     form
     .validateFields()
     .then(async (values) => {
       try {
-        // await service.inviteMember(values.name);
-        const id = String(Number(datatableList[datatableList.length - 1].id) + 1);
-        const newDatatableList = [...datatableList, {
-          id: id,
-          datatableName: values.datatableName,
-          datatableSource: values.datatableSource
-        }];
-        setDatatableList(newDatatableList);
-        setDisplayDatatableList(newDatatableList);
+        let datatable: API.PriSqlDatatable = {
+          projectId: projectId as string,
+          name: values.name,
+          member: userId as string,
+          connectionStr: values.connectionStr
+        };
+        await datatableSettingService.createDatatable(datatable);
+        setIsAddModalOpen(false);
         form.resetFields();
         message.success('添加数据表成功');
-        setIsAddModalOpen(false);
       } catch (e) {
         if (e instanceof Error) {
           message.error(e.message);
@@ -86,21 +82,23 @@ export const DatatableSetting = () => {
     });
   };
 
+  const [searchInput, setSearchInput] = useState('');
   const searchDatatable = (e: ChangeEvent<HTMLInputElement>) => {
-    setDisplayDatatableList(datatableList.filter(datatable => datatable.datatableName.toLowerCase().includes(e.target.value.toLowerCase())));
+    setSearchInput(e.target.value);
+    datatableSettingListModel.searchDatatable(e.target.value);
   };
 
   const columns = [
     {
       title: '表名称',
-      dataIndex: 'datatableName',
-      key: 'datatableName',
+      dataIndex: 'name',
+      key: 'name',
       width: '30%',
     },
     {
       title: '数据来源',
-      dataIndex: 'datatableSource',
-      key: 'datatableSource',
+      dataIndex: 'connectionStr',
+      key: 'connectionStr',
       width: '50%'
     },
     {
@@ -122,7 +120,13 @@ export const DatatableSetting = () => {
     PLAINTEXT_AFTER_COMPARE = 'PLAINTEXT_AFTER_COMPARE',
     PLAINTEXT_AFTER_AGGREGATE = 'PLAINTEXT_AFTER_AGGREGATE',
     PLAINTEXT_AS_JOIN_PAYLOAD = 'PLAINTEXT_AS_JOIN_PAYLOAD'
-  }
+  };
+
+  enum Datatype {
+    INT = 'int',
+    DOUBLE = 'double',
+    VARCHAR = 'varchar'
+  };
 
   const CONSTRAINT = [
     Constraint.UNKNOWN,
@@ -135,11 +139,18 @@ export const DatatableSetting = () => {
     Constraint.PLAINTEXT_AS_JOIN_PAYLOAD
   ];
 
+  const DATATYPE = [
+    Datatype.INT,
+    Datatype.DOUBLE,
+    Datatype.VARCHAR
+  ];
+
   const cclColumns = [
     {
       title: '列',
-      dataIndex: 'column',
-      key: 'column',
+      dataIndex: 'columnName',
+      key: 'columnName',
+      width: '20%',
       render: (text: string, record: any) => (
           <Input
               value={text}
@@ -148,23 +159,58 @@ export const DatatableSetting = () => {
               required
               onChange={(e) => {
                 const newCclList = cclList.map((c) => {
-                  if (c.id === record.id) {
+                  if (c.rowId === record.rowId) {
                     return {
                       ...c,
-                      'column': e.target.value,
+                      'columnName': e.target.value,
                     };
                   }
                   return c;
                 });
-                setCclList(newCclList);
+                setCclListTmp2(newCclList);
+              }}
+              onBlur={() => {
+                datatableSettingListModel.setCclListTmp(cclListTmp2);
+              }}
+          />
+      ),
+    },
+    {
+      title: '列数据类型',
+      dataIndex: 'columnDatatype',
+      key: 'columnDatatype',
+      width: '20%',
+      render: (text: string, record: any) => (
+          <Select
+              options={DATATYPE.map((c) => ({label: c, value: c}))}
+              value={text}
+              size="small"
+              style={{width: '100%'}}
+              popupClassName="datatype-select"
+              defaultValue={Constraint.UNKNOWN}
+              onChange={(value) => {
+                const newCclList = cclList.map((c) => {
+                  if (c.rowId === record.rowId) {
+                    return {
+                      ...c,
+                      'columnDatatype': value,
+                    };
+                  }
+                  return c;
+                });
+                setCclListTmp2(newCclList);
+              }}
+              onBlur={() => {
+                datatableSettingListModel.setCclListTmp(cclListTmp2);
               }}
           />
       ),
     },
     {
       title: '用户id',
-      dataIndex: 'userId',
-      key: 'userId',
+      dataIndex: 'member',
+      key: 'member',
+      width: '20%',
       render: (text: string, record: any) => (
           <Input
               value={text}
@@ -173,15 +219,18 @@ export const DatatableSetting = () => {
               required
               onChange={(e) => {
                 const newCclList = cclList.map((c) => {
-                  if (c.id === record.id) {
+                  if (c.rowId === record.rowId) {
                     return {
                       ...c,
-                      'userId': e.target.value,
+                      'member': e.target.value,
                     };
                   }
                   return c;
                 });
-                setCclList(newCclList);
+                setCclListTmp2(newCclList);
+              }}
+              onBlur={() => {
+                datatableSettingListModel.setCclListTmp(cclListTmp2);
               }}
           />
       ),
@@ -201,7 +250,7 @@ export const DatatableSetting = () => {
               defaultValue={Constraint.UNKNOWN}
               onChange={(value) => {
                 const newCclList = cclList.map((c) => {
-                  if (c.id === record.id) {
+                  if (c.rowId === record.rowId) {
                     return {
                       ...c,
                       'access': value,
@@ -209,7 +258,10 @@ export const DatatableSetting = () => {
                   }
                   return c;
                 });
-                setCclList(newCclList);
+                setCclListTmp2(newCclList);
+              }}
+              onBlur={() => {
+                datatableSettingListModel.setCclListTmp(cclListTmp2);
               }}
           />
       ),
@@ -230,7 +282,8 @@ export const DatatableSetting = () => {
 
   const removeAccess = (id: string) => {
     const newCclList = cclList.filter((c) => c.id !== id);
-    setCclList(newCclList);
+    setCclListTmp2(newCclList);
+    datatableSettingListModel.setCclListTmp(newCclList);
   };
 
   const onBtnClick = (key: string, id?: string) => {
@@ -239,13 +292,11 @@ export const DatatableSetting = () => {
         setIsAddModalOpen(true);
         break;
       case 'configCCL':
-        setSelectedDatatableId(id as string);
+        setSelectedDatatableId(toNumber(id));
         setIsConfigModalOpen(true);
         break;
       case 'delete':
-        const newDatatableList = datatableList.filter(datatable => datatable.id !== id);
-        setDatatableList(newDatatableList);
-        setDisplayDatatableList(newDatatableList);
+        datatableSettingService.deleteDatatable(datatableList.find(datatable => datatable.id === id) as API.PriSqlDatatable);
         break;
       default:
         break;
@@ -254,12 +305,16 @@ export const DatatableSetting = () => {
 
   const addCcl = () => {
     const newCclList = [...cclList, {
-      id: String(Number(cclList[cclList.length - 1].id) + 1),
-      column: '',
-      userId: '',
-      access: ''
+      datatableId: selectedDatatableId,
+      columnName: '',
+      columnDatatype: '',
+      member: '',
+      access: '',
+      rowId: String(cclList.length),
     }];
-    setCclList(newCclList);
+    console.log(newCclList)
+    setCclListTmp2(newCclList);
+    datatableSettingListModel.setCclListTmp(newCclList);
   };
 
   return (
@@ -269,6 +324,7 @@ export const DatatableSetting = () => {
               placeholder="搜索数据表"
               onChange={(e) => searchDatatable(e)}
               style={{width: 200}}
+              value={searchInput}
               suffix={
                 <SearchOutlined
                     style={{
@@ -289,10 +345,11 @@ export const DatatableSetting = () => {
         ) : (
             <div className={styles.content}>
               <Table
-                  dataSource={displayDatatableList}
+                  loading={datatableSettingService.loading}
+                  dataSource={datatableList}
                   columns={columns}
                   size="small"
-                  rowKey={(record) => record.userId as string}
+                  rowKey={(record) => record.id as string}
               />
             </div>
         )}
@@ -313,14 +370,14 @@ export const DatatableSetting = () => {
           >
             <Form.Item
                 label="表名称"
-                name="datatableName"
+                name="name"
                 rules={[{required: true, message: '请输入表名称'}]}
             >
               <Input maxLength={16}/>
             </Form.Item>
             <Form.Item
                 label="数据来源"
-                name="datatableSource"
+                name="connectionStr"
                 rules={[{required: true, message: '请输入数据来源'}]}
             >
               <Input/>
@@ -337,16 +394,18 @@ export const DatatableSetting = () => {
             onCancel={handleConfigModalCancel}
             afterOpenChange={(open) => {
               if (open) {
-                getTableCCL();
+                datatableSettingService.getCclList(selectedDatatableId).then((res) => {
+                  setCclListTmp2(res);
+                });
               }
             }}
         >
-          <div
-              style={{marginBottom: '8px'}}>表名：{datatableList.find(datatable => datatable.id === selectedDatatableId)?.datatableName}</div>
+          <div style={{marginBottom: '8px'}}>表名：{datatableList.find(datatable => datatable.id == String(selectedDatatableId))?.name}</div>
           <Table
+              loading={datatableSettingService.cclLoading}
               className="ccl-table"
-              dataSource={cclList}
-              rowKey="id"
+              dataSource={cclListTmp2}
+              rowKey={(record) => record.rowId as string}
               pagination={false}
               columns={cclColumns}
               size="small"
@@ -363,3 +422,24 @@ export const DatatableSetting = () => {
       </div>
   );
 };
+
+export class DatatableSettingListModel extends Model {
+  readonly datatableSettingService;
+
+  constructor() {
+    super();
+    this.datatableSettingService = getModel(DatatableSettingService);
+  }
+
+  searchDatatable = (value: string) => {
+    this.datatableSettingService.displayDatatableList =
+        this.datatableSettingService.datatableList.filter((i) => {
+          if (!i.name) return;
+          return i.name?.indexOf(value) >= 0;
+        });
+  }
+
+  setCclListTmp = (newCclList: API.PriSqlColumnAccess[]) => {
+    this.datatableSettingService.cclListTmp = newCclList;
+  }
+}

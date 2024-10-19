@@ -1,27 +1,29 @@
 import React, {type ChangeEvent, useEffect, useState} from 'react';
-import {Button, Empty, Form, Input, message, Popover, Space, Table, Tooltip} from "antd";
+import {Button, Empty, Form, Input, message, Popover, Space, Table} from "antd";
 import {Plus} from "lucide-react";
 import styles from "@/modules/p2p-project-list/index.less";
 import './index.less';
 import {SearchOutlined} from "@ant-design/icons";
+import {Model, getModel, useModel} from "@/util/valtio-helper";
+import {UserManagementService} from "@/modules/prisql/user-management/user-management.service";
+import {useLocation} from "umi";
+import {parse} from "query-string";
 
 export const UserManagement = () => {
+  const memberStatusListModel = useModel(MemberStatusListModel);
   const [form] = Form.useForm();
   const [addFormVisible, setAddFormVisible] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const formValues = Form.useWatch([], form);
 
-  const [userList, setUserList] = useState<any[]>([
-    {id: "1", userId: 'alice', status: 'owner'},
-    {id: "2", userId: 'bob2', status: 'sent request'},
-    {id: "3", userId: 'bob3', status: 'accepted'},
-    {id: "4", userId: 'bob4', status: 'rejected'}
-  ]);
+  const { search, pathname } = useLocation();
+  const { projectId } = parse(search);
+  const userManagementService = useModel(UserManagementService);
 
-  const [displayUserList, setDisplayUserList] = useState<any[]>([]);
+  const {displayMemberStatusList: memberStatusList} = userManagementService;
 
   useEffect(() => {
-    setDisplayUserList(userList);
+    userManagementService.getMemberStatusList(projectId as string);
   }, []);
 
   const addMember = () => {
@@ -30,12 +32,7 @@ export const UserManagement = () => {
     .then(async (values) => {
       setAddLoading(true);
       try {
-        // await service.inviteMember(values.name);
-        const id = String(Number(userList[userList.length -1].id) + 1);
-        const newUserList = [...userList, {id: id, userId: values.name, status: 'sent request'}];
-        console.log(newUserList);
-        setUserList(newUserList);
-        setDisplayUserList(newUserList);
+        await userManagementService.inviteMember(projectId as string, values.member);
         setAddFormVisible(false);
         form.resetFields();
         message.success('请求已发送');
@@ -65,7 +62,7 @@ export const UserManagement = () => {
         >
           <Form.Item
               label=""
-              name="name"
+              name="member"
               rules={[
                 {required: true, message: '请输入邀请者id'},
               ]}
@@ -82,7 +79,7 @@ export const UserManagement = () => {
                   onClick={() => {
                     addMember();
                   }}
-                  disabled={formValues && !formValues.name}
+                  disabled={formValues && !formValues.member}
                   loading={addLoading}
               >
                 邀请
@@ -93,15 +90,17 @@ export const UserManagement = () => {
       </div>
   );
 
-  const searchUser = (e: ChangeEvent<HTMLInputElement>) => {
-    setDisplayUserList(userList.filter(user => user.userId.toLowerCase().includes(e.target.value.toLowerCase())));
+  const [searchInput, setSearchInput] = useState('');
+  const searchMemberStatus = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+    memberStatusListModel.searchMemberStatus(e.target.value);
   };
 
   const columns = [
     {
       title: '用户id',
-      dataIndex: 'userId',
-      key: 'userId',
+      dataIndex: 'member',
+      key: 'member',
       width: '50%',
     },
     {
@@ -122,8 +121,9 @@ export const UserManagement = () => {
         <Space size="middle" wrap style={{marginBottom: 16}}>
           <Input
               placeholder="搜索用户"
-              onChange={(e) => searchUser(e)}
+              onChange={(e) => searchMemberStatus(e)}
               style={{width: 200}}
+              value={searchInput}
               suffix={
                 <SearchOutlined
                     style={{
@@ -153,12 +153,13 @@ export const UserManagement = () => {
           </Popover>
         </Space>
 
-        {userList.length === 0 ? (
+        {memberStatusList.length === 0 ? (
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
         ) : (
             <div className={styles.content}>
               <Table
-                  dataSource={displayUserList}
+                  loading={userManagementService.loading}
+                  dataSource={memberStatusList}
                   columns={columns}
                   size="small"
                   rowKey={(record) => record.id as string}
@@ -168,3 +169,20 @@ export const UserManagement = () => {
       </div>
   );
 };
+
+export class MemberStatusListModel extends Model {
+  readonly userManagementService;
+
+  constructor() {
+    super();
+    this.userManagementService = getModel(UserManagementService);
+  }
+
+  searchMemberStatus = (value: string) => {
+    this.userManagementService.displayMemberStatusList =
+        this.userManagementService.memberStatusList.filter((i) => {
+          if (!i.member) return;
+          return i.member?.indexOf(value) >= 0;
+        });
+  }
+}
