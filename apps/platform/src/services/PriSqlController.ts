@@ -84,13 +84,13 @@ export async function handleCclList(datatableId: number, newCclList: API.PriSqlC
   });
 }
 
-export async function runSQL(sql: string) {
-  return request('/pc/api/prisql/columnAccess/handle', {
+export async function runSQL(scql: string) {
+  return request('/pc/api/prisql/runSQL', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    data: JSON.stringify({ sql: sql }),
+    data: JSON.stringify({ scql: scql }),
   });
 }
 

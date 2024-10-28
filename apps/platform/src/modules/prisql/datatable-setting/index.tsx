@@ -63,6 +63,7 @@ export const DatatableSetting = () => {
         let datatable: API.PriSqlDatatable = {
           projectId: projectId as string,
           name: values.name,
+          refTableName: values.refTableName,
           member: userId as string,
           connectionStr: values.connectionStr
         };
@@ -93,7 +94,13 @@ export const DatatableSetting = () => {
       title: '表名称',
       dataIndex: 'name',
       key: 'name',
-      width: '30%',
+      width: '15%',
+    },
+    {
+      title: '关联表',
+      dataIndex: 'refTableName',
+      key: 'refTableName',
+      width: '15%',
     },
     {
       title: '数据来源',
@@ -274,14 +281,14 @@ export const DatatableSetting = () => {
               size={14}
               color="#182431"
               cursor="pointer"
-              onClick={() => removeAccess(record.id)}
+              onClick={() => removeAccess(record.rowId)}
           />
       ),
     },
   ];
 
-  const removeAccess = (id: string) => {
-    const newCclList = cclList.filter((c) => c.id !== id);
+  const removeAccess = (rowId: string) => {
+    const newCclList = cclList.filter((c) => c.rowId !== rowId);
     setCclListTmp2(newCclList);
     datatableSettingListModel.setCclListTmp(newCclList);
   };
@@ -372,6 +379,13 @@ export const DatatableSetting = () => {
                 label="表名称"
                 name="name"
                 rules={[{required: true, message: '请输入表名称'}]}
+            >
+              <Input maxLength={16}/>
+            </Form.Item>
+            <Form.Item
+                label="关联表"
+                name="refTableName"
+                rules={[{required: true, message: '请输入关联表名称'}]}
             >
               <Input maxLength={16}/>
             </Form.Item>

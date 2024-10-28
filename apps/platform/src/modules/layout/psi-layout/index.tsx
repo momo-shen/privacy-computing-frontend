@@ -23,7 +23,7 @@ export const PsiLayout = () => {
     setLoading(true);
     let jsonData = await form.validateFields();
     const senderIpRes = await getIp();
-    let senderIp = senderIpRes.ip;
+    let senderIp = senderIpRes.data;
     let psiProject: API.PsiProject = {
       projectName: projectName,
       senderId: senderId,

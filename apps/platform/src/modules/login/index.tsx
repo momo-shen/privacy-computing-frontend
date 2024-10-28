@@ -37,7 +37,7 @@ export class LoginModel extends Model {
     const resJson = JSON.parse(JSON.stringify(result));
 
     this.loginService.userInfo = result.data as User;
-    if (resJson.status === "success") {
+    if (resJson.code === "0") {
       if (this.loginService.userInfo.userId) {
         localStorage.setItem('neverLogined', 'true');
         localStorage.setItem('userId', this.loginService.userInfo.userId);
