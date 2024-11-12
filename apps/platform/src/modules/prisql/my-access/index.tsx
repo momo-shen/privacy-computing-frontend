@@ -36,6 +36,11 @@ export const MyAccess = () => {
       key: 'datatableName',
     },
     {
+      title: '关联表',
+      dataIndex: 'refTableName',
+      key: 'refTableName',
+    },
+    {
       title: '列',
       dataIndex: 'columnName',
       key: 'columnName',
@@ -99,10 +104,11 @@ export class MyAccessListModel extends Model {
   searchMyAccess = (value: string) => {
     this.myAccessService.displayMyAccessList =
         this.myAccessService.myAccessList.filter((i) => {
-          if (!i.owner || !i.datatableName || !i.columnName
+          if (!i.owner || !i.datatableName || !i.refTableName || !i.columnName
           || !i.access || !i.columnDatatype) return;
           return i.owner?.indexOf(value) >= 0
               || i.datatableName?.indexOf(value) >= 0
+              || i.refTableName?.indexOf(value) >= 0
               || i.columnName?.indexOf(value) >= 0
               || i.access?.indexOf(value) >= 0
               || i.columnDatatype?.indexOf(value) >= 0;

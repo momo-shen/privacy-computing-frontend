@@ -119,14 +119,13 @@ export const DatatableSetting = () => {
   ];
 
   enum Constraint {
-    UNKNOWN = 'UNKNOWN',
-    PLAINTEXT = 'PLAINTEXT',
-    ENCRYPTED_ONLY = 'ENCRYPTED_ONLY',
-    PLAINTEXT_AFTER_JOIN = 'PLAINTEXT_AFTER_JOIN',
-    PLAINTEXT_AFTER_GROUP_BY = 'PLAINTEXT_AFTER_GROUP_BY',
-    PLAINTEXT_AFTER_COMPARE = 'PLAINTEXT_AFTER_COMPARE',
-    PLAINTEXT_AFTER_AGGREGATE = 'PLAINTEXT_AFTER_AGGREGATE',
-    PLAINTEXT_AS_JOIN_PAYLOAD = 'PLAINTEXT_AS_JOIN_PAYLOAD'
+    PLAINTEXT = 'plain',
+    ENCRYPTED_ONLY = 'encrypt',
+    PLAINTEXT_AFTER_JOIN = 'join',
+    PLAINTEXT_AFTER_GROUP_BY = 'groupby',
+    PLAINTEXT_AFTER_COMPARE = 'compare',
+    PLAINTEXT_AFTER_AGGREGATE = 'aggregate',
+    PLAINTEXT_AS_JOIN_PAYLOAD = 'joinpayload'
   };
 
   enum Datatype {
@@ -136,7 +135,6 @@ export const DatatableSetting = () => {
   };
 
   const CONSTRAINT = [
-    Constraint.UNKNOWN,
     Constraint.PLAINTEXT,
     Constraint.ENCRYPTED_ONLY,
     Constraint.PLAINTEXT_AFTER_JOIN,
@@ -194,7 +192,7 @@ export const DatatableSetting = () => {
               size="small"
               style={{width: '100%'}}
               popupClassName="datatype-select"
-              defaultValue={Constraint.UNKNOWN}
+              defaultValue={Datatype.INT}
               onChange={(value) => {
                 const newCclList = cclList.map((c) => {
                   if (c.rowId === record.rowId) {
@@ -254,7 +252,7 @@ export const DatatableSetting = () => {
               size="small"
               style={{width: '100%'}}
               popupClassName="ccl-select"
-              defaultValue={Constraint.UNKNOWN}
+              defaultValue={Constraint.PLAINTEXT}
               onChange={(value) => {
                 const newCclList = cclList.map((c) => {
                   if (c.rowId === record.rowId) {

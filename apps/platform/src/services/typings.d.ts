@@ -64,6 +64,7 @@ declare namespace API {
     id?: string;
     owner?: string;
     datatableName?: string;
+    refTableName?: string;
     columnName?: string;
     access?: string;
     columnDatatype?: string;
