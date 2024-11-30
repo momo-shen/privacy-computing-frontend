@@ -46,7 +46,7 @@ declare namespace API {
     projectId?: string;
     name?: string;
     refTableName?: string;
-    member?: string;
+    owner?: string;
     connectionStr?: string;
   }
 

@@ -10,9 +10,9 @@ export class DatatableSettingService extends Model {
   cclListTmp: API.PriSqlColumnAccess[] = [];
   cclLoading = false;
 
-  getDatatableList = async (projectId: string, member: string) => {
+  getDatatableList = async (projectId: string, owner: string) => {
     this.loading = true;
-    const response = await API.PriSqlController.getDatatableList(projectId, member);
+    const response = await API.PriSqlController.getDatatableList(projectId, owner);
     const data = response.data;
     this.datatableList = data || [];
     this.loading = false;
@@ -24,7 +24,7 @@ export class DatatableSettingService extends Model {
     this.loading = true;
     const response = await API.PriSqlController.createDatatable(priSqlDatatable);
     const data = response.data;
-    await this.getDatatableList(priSqlDatatable.projectId as string, priSqlDatatable.member as string);
+    await this.getDatatableList(priSqlDatatable.projectId as string, priSqlDatatable.owner as string);
     this.loading = false;
     return data;
   }
@@ -33,7 +33,7 @@ export class DatatableSettingService extends Model {
     this.loading = true;
     const response = await API.PriSqlController.deleteDatatable(priSqlDatatable.id as string);
     const data = response.data;
-    await this.getDatatableList(priSqlDatatable.projectId as string, priSqlDatatable.member as string);
+    await this.getDatatableList(priSqlDatatable.projectId as string, priSqlDatatable.owner as string);
     this.loading = false;
     return data;
   }

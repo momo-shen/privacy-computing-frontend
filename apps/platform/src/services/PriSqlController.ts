@@ -44,10 +44,10 @@ export async function inviteMember(projectId: string, member: string) {
   });
 }
 
-export async function getDatatableList(projectId: string, member: string) {
+export async function getDatatableList(projectId: string, owner: string) {
   return request('/pc/api/prisql/datatable/list', {
     method: 'GET',
-    params: { projectId: projectId, member: member },
+    params: { projectId: projectId, owner: owner },
   });
 }
 

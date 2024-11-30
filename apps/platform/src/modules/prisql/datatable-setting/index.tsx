@@ -64,7 +64,7 @@ export const DatatableSetting = () => {
           projectId: projectId as string,
           name: values.name,
           refTableName: values.refTableName,
-          member: userId as string,
+          owner: userId as string,
           connectionStr: values.connectionStr
         };
         await datatableSettingService.createDatatable(datatable);
